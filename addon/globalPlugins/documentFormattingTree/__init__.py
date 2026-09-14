@@ -2,8 +2,7 @@ import wx
 
 import config
 import globalPluginHandler
-import guiHelper
-from gui import nvdaControls
+from gui import guiHelper, nvdaControls
 from gui.settingsDialogs import NVDASettingsDialog, SettingsPanel
 
 try:
@@ -259,3 +258,4 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		for key, value in self._state.items():
 			if key in docFormatting:
 				docFormatting[key] = value
+
