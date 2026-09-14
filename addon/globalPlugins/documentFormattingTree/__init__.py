@@ -46,7 +46,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 
 class DocumentFormattingTreePanel(SettingsPanel):
-	title = _("NVDA文档设置")
+	title = _("NVDA Document Settings")
 
 	def makeSettings(self, settingsSizer):
 		docFormatting = config.conf["documentFormatting"]
@@ -62,7 +62,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		helper.addItem(mainSizer, flag=wx.EXPAND, proportion=1)
 
 		self.categoryTree = wx.TreeCtrl(self, style=wx.TR_HIDE_ROOT | wx.TR_SINGLE | wx.TR_HAS_BUTTONS)
-		self.categoryTree.SetName(_("分类"))
+		self.categoryTree.SetName(_("Categories"))
 		mainSizer.Add(self.categoryTree, proportion=1, flag=wx.EXPAND | wx.RIGHT, border=10)
 
 		self.categorySettingsPanel = wx.Panel(self)
@@ -82,30 +82,30 @@ class DocumentFormattingTreePanel(SettingsPanel):
 
 	def _buildCategories(self):
 		return [
-			Category(_("字体与文本"), [
-				Option(_("字体名称"), "reportFontName"), Option(_("字体大小"), "reportFontSize"),
-				Option(_("上标和下标"), "reportSuperscriptsAndSubscripts"), Option(_("强调"), "reportEmphasis"),
-				Option(_("高亮文本"), "reportHighlight"), Option(_("样式"), "reportStyle"), Option(_("颜色"), "reportColor"),
-			], [Option(_("字体属性报告"), "fontAttributeReporting", [_('关闭'), _('语音'), _('盲文'), _('语音和盲文')], [0, 1, 2, 3])]),
-			Category(_("文档信息"), [Option(_("注释"), "reportComments"), Option(_("书签"), "reportBookmarks"), Option(_("编辑修订"), "reportRevisions")], [
-				Option(_("拼写或语法错误"), "reportSpellingErrors2", [_('关闭'), _('语音'), _('声音'), _('盲文'), _('语音和声音'), _('语音和盲文'), _('声音和盲文'), _('语音、声音和盲文')], [0, 1, 2, 4, 3, 5, 6, 7])
+			Category(_("Font and text"), [
+				Option(_("Font name"), "reportFontName"), Option(_("Font size"), "reportFontSize"),
+				Option(_("Superscripts and subscripts"), "reportSuperscriptsAndSubscripts"), Option(_("Emphasis"), "reportEmphasis"),
+				Option(_("Highlighted text"), "reportHighlight"), Option(_("Style"), "reportStyle"), Option(_("Color"), "reportColor"),
+			], [Option(_("Font attribute reporting"), "fontAttributeReporting", [_('Off'), _('Speech'), _('Braille'), _('Speech and braille')], [0, 1, 2, 3])]),
+			Category(_("Document information"), [Option(_("Comments"), "reportComments"), Option(_("Bookmarks"), "reportBookmarks"), Option(_("Editor revisions"), "reportRevisions")], [
+				Option(_("Spelling or grammar errors"), "reportSpellingErrors2", [_('Off'), _('Speech'), _('Sound'), _('Braille'), _('Speech and sound'), _('Speech and braille'), _('Sound and braille'), _('Speech, sound and braille')], [0, 1, 2, 4, 3, 5, 6, 7])
 			]),
-			Category(_("页面与间距"), [
-				Option(_("页码"), "reportPage"), Option(_("行号"), "reportLineNumber"), Option(_("忽略空白行的行缩进报告"), "ignoreBlankLinesForRLI"),
-				Option(_("段落缩进"), "reportParagraphIndentation"), Option(_("行距"), "reportLineSpacing"), Option(_("对齐方式"), "reportAlignment"),
-			], [Option(_("行缩进报告"), "reportLineIndentation", [_('关闭'), _('语音'), _('提示音'), _('语音和提示音')], [0, 1, 2, 3])], [
-				Option(_("缩进提示音长度，毫秒"), "indentToneDuration", minimum=10, maximum=2000)
+			Category(_("Pages and spacing"), [
+				Option(_("Page numbers"), "reportPage"), Option(_("Line numbers"), "reportLineNumber"), Option(_("Ignore blank lines for line indentation reporting"), "ignoreBlankLinesForRLI"),
+				Option(_("Paragraph indentation"), "reportParagraphIndentation"), Option(_("Line spacing"), "reportLineSpacing"), Option(_("Alignment"), "reportAlignment"),
+			], [Option(_("Line indentation reporting"), "reportLineIndentation", [_('Off'), _('Speech'), _('Tones'), _('Speech and tones')], [0, 1, 2, 3])], [
+				Option(_("Indentation tone duration, milliseconds"), "indentToneDuration", minimum=10, maximum=2000)
 			]),
-			Category(_("表格信息"), [Option(_("表格"), "reportTables"), Option(_("布局表格"), "includeLayoutTables"), Option(_("单元格坐标"), "reportTableCellCoords")], [
-				Option(_("表格标题"), "reportTableHeaders", [_('关闭'), _('行和列'), _('行'), _('列')], [0, 1, 2, 3]),
-				Option(_("单元格边框"), "reportCellBorders", [_('关闭'), _('样式'), _('颜色和样式')], [0, 1, 2]),
+			Category(_("Table information"), [Option(_("Tables"), "reportTables"), Option(_("Layout tables"), "includeLayoutTables"), Option(_("Cell coordinates"), "reportTableCellCoords")], [
+				Option(_("Table headers"), "reportTableHeaders", [_('Off'), _('Rows and columns'), _('Rows'), _('Columns')], [0, 1, 2, 3]),
+				Option(_("Cell borders"), "reportCellBorders", [_('Off'), _('Style'), _('Color and style')], [0, 1, 2]),
 			]),
-			Category(_("元素"), [
-				Option(_("标题"), "reportHeadings"), Option(_("链接"), "reportLinks"), Option(_("链接类型"), "reportLinkType"), Option(_("图形"), "reportGraphics"),
-				Option(_("列表"), "reportLists"), Option(_("引用块"), "reportBlockQuotes"), Option(_("分组"), "reportGroupings"), Option(_("地标和区域"), "reportLandmarks"),
-				Option(_("文章"), "reportArticles"), Option(_("框架"), "reportFrames"), Option(_("图表和说明"), "reportFigures"), Option(_("可点击"), "reportClickable"),
+			Category(_("Elements"), [
+				Option(_("Headings"), "reportHeadings"), Option(_("Links"), "reportLinks"), Option(_("Link type"), "reportLinkType"), Option(_("Graphics"), "reportGraphics"),
+				Option(_("Lists"), "reportLists"), Option(_("Block quotes"), "reportBlockQuotes"), Option(_("Groupings"), "reportGroupings"), Option(_("Landmarks and regions"), "reportLandmarks"),
+				Option(_("Articles"), "reportArticles"), Option(_("Frames"), "reportFrames"), Option(_("Figures and captions"), "reportFigures"), Option(_("Clickable"), "reportClickable"),
 			]),
-			Category(_("高级"), [Option(_("报告光标后格式变化，可能导致延迟"), "detectFormatAfterCursor")]),
+			Category(_("Advanced"), [Option(_("Report formatting changes after the cursor, may cause lag"), "detectFormatAfterCursor")]),
 		]
 
 	def _onCategoryChanged(self, event):
@@ -137,7 +137,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		except RuntimeError:
 			return
 		except Exception:
-			log.exception("Error showing NVDA文档设置 category")
+			log.exception("Error showing NVDA Document Settings category")
 
 	def _showCategoryUnsafe(self, index):
 		if index == self._currentCategoryIndex:
@@ -153,7 +153,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 			if category.boolOptions:
 				self._boolOptions = category.boolOptions
 				self.boolList = nvdaControls.CustomCheckListBox(self.categorySettingsPanel, choices=[option.label for option in category.boolOptions])
-				self.boolList.SetName(_("当前分类设置"))
+				self.boolList.SetName(_("Current category settings"))
 				self.boolList.SetCheckedItems([i for i, option in enumerate(category.boolOptions) if bool(self._state.get(option.key))])
 				self.boolList.Bind(wx.EVT_CHECKLISTBOX, self._onBoolListChanged)
 				self.categorySettingsSizer.Add(self.boolList, flag=wx.EXPAND | wx.BOTTOM, border=10)

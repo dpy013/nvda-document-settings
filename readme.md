@@ -1,3 +1,3 @@
-# NVDA文档设置
+# NVDA Document Settings
 
-实验性 NVDA 插件：在 NVDA 设置中添加“NVDA文档设置”面板，用树形分类组织文档格式设置。
+Experimental NVDA add-on: adds an "NVDA Document Settings" panel to NVDA Settings and organizes document formatting options with a category tree.

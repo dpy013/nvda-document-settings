@@ -1,5 +1,5 @@
 name = "documentFormattingTree"
-summary = "NVDA文档设置"
+summary = "NVDA Document Settings"
 description = "Tree based prototype panel for NVDA document formatting settings."
 author = ""
 version = "0.1.0"
