@@ -65,10 +65,10 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		self.categoryTree.SetName(_("分类"))
 		mainSizer.Add(self.categoryTree, proportion=1, flag=wx.EXPAND | wx.RIGHT, border=10)
 
-		self.settingsPanel = wx.Panel(self)
-		self.settingsSizer = wx.BoxSizer(wx.VERTICAL)
-		self.settingsPanel.SetSizer(self.settingsSizer)
-		mainSizer.Add(self.settingsPanel, proportion=2, flag=wx.EXPAND)
+		self.categorySettingsPanel = wx.Panel(self)
+		self.categorySettingsSizer = wx.BoxSizer(wx.VERTICAL)
+		self.categorySettingsPanel.SetSizer(self.categorySettingsSizer)
+		mainSizer.Add(self.categorySettingsPanel, proportion=2, flag=wx.EXPAND)
 
 		root = self.categoryTree.AddRoot("root")
 		for index, category in enumerate(self._categories):
@@ -109,15 +109,18 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		]
 
 	def _onCategoryChanged(self, event):
-		index = self.categoryTree.GetItemData(event.GetItem())
+		try:
+			index = self.categoryTree.GetItemData(event.GetItem())
+		except RuntimeError:
+			return
 		event.Skip()
 		if isinstance(index, int) and index != self._currentCategoryIndex:
 			wx.CallAfter(self._showCategory, index)
 
 	def _clearSettingsPanel(self):
-		for child in self.settingsPanel.GetChildren():
+		for child in self.categorySettingsPanel.GetChildren():
 			child.Destroy()
-		self.settingsSizer.Clear()
+		self.categorySettingsSizer.Clear()
 		self._boolOptions = []
 		self._choiceControls = []
 		self._spinControls = []
@@ -125,7 +128,14 @@ class DocumentFormattingTreePanel(SettingsPanel):
 
 	def _showCategory(self, index):
 		try:
+			if not self.categorySettingsPanel:
+				return
+		except RuntimeError:
+			return
+		try:
 			self._showCategoryUnsafe(index)
+		except RuntimeError:
+			return
 		except Exception:
 			log.exception("Error showing NVDA文档设置 category")
 
@@ -133,24 +143,24 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		if index == self._currentCategoryIndex:
 			return
 		self._currentCategoryIndex = index
-		self.settingsPanel.Freeze()
+		self.categorySettingsPanel.Freeze()
 		try:
 			self._clearSettingsPanel()
 			category = self._categories[index]
-			title = wx.StaticText(self.settingsPanel, label=category.label)
-			self.settingsSizer.Add(title, flag=wx.BOTTOM, border=8)
+			title = wx.StaticText(self.categorySettingsPanel, label=category.label)
+			self.categorySettingsSizer.Add(title, flag=wx.BOTTOM, border=8)
 
 			if category.boolOptions:
 				self._boolOptions = category.boolOptions
-				self.boolList = nvdaControls.CustomCheckListBox(self.settingsPanel, choices=[option.label for option in category.boolOptions])
+				self.boolList = nvdaControls.CustomCheckListBox(self.categorySettingsPanel, choices=[option.label for option in category.boolOptions])
 				self.boolList.SetName(_("当前分类设置"))
 				self.boolList.SetCheckedItems([i for i, option in enumerate(category.boolOptions) if bool(self._state.get(option.key))])
 				self.boolList.Bind(wx.EVT_CHECKLISTBOX, self._onBoolListChanged)
-				self.settingsSizer.Add(self.boolList, flag=wx.EXPAND | wx.BOTTOM, border=10)
+				self.categorySettingsSizer.Add(self.boolList, flag=wx.EXPAND | wx.BOTTOM, border=10)
 
 			for option in category.choiceOptions:
-				label = wx.StaticText(self.settingsPanel, label=option.label)
-				choice = wx.Choice(self.settingsPanel, choices=list(option.choices))
+				label = wx.StaticText(self.categorySettingsPanel, label=option.label)
+				choice = wx.Choice(self.categorySettingsPanel, choices=list(option.choices))
 				choice.SetName(option.label)
 				try:
 					selection = option.values.index(self._state.get(option.key))
@@ -159,26 +169,26 @@ class DocumentFormattingTreePanel(SettingsPanel):
 				choice.SetSelection(selection)
 				choice.option = option
 				choice.Bind(wx.EVT_CHOICE, self._onChoiceChanged)
-				self.settingsSizer.Add(label)
-				self.settingsSizer.Add(choice, flag=wx.EXPAND | wx.BOTTOM, border=10)
+				self.categorySettingsSizer.Add(label)
+				self.categorySettingsSizer.Add(choice, flag=wx.EXPAND | wx.BOTTOM, border=10)
 				self._choiceControls.append(choice)
 
 			for option in category.spinOptions:
-				label = wx.StaticText(self.settingsPanel, label=option.label)
-				spin = wx.SpinCtrl(self.settingsPanel, min=option.minimum, max=option.maximum, initial=int(self._state.get(option.key, option.minimum)))
+				label = wx.StaticText(self.categorySettingsPanel, label=option.label)
+				spin = wx.SpinCtrl(self.categorySettingsPanel, min=option.minimum, max=option.maximum, initial=int(self._state.get(option.key, option.minimum)))
 				spin.SetName(option.label)
 				spin.option = option
 				spin.Bind(wx.EVT_SPINCTRL, self._onSpinChanged)
 				spin.Bind(wx.EVT_TEXT, self._onSpinChanged)
-				self.settingsSizer.Add(label)
-				self.settingsSizer.Add(spin, flag=wx.EXPAND | wx.BOTTOM, border=10)
+				self.categorySettingsSizer.Add(label)
+				self.categorySettingsSizer.Add(spin, flag=wx.EXPAND | wx.BOTTOM, border=10)
 				self._spinControls.append(spin)
 
 			self._updateDependentControls()
-			self.settingsPanel.Layout()
+			self.categorySettingsPanel.Layout()
 			self.Layout()
 		finally:
-			self.settingsPanel.Thaw()
+			self.categorySettingsPanel.Thaw()
 
 	def _onBoolListChanged(self, event):
 		index = event.GetSelection()
