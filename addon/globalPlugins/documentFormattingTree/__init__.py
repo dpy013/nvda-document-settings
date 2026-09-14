@@ -2,6 +2,7 @@ import wx
 
 import config
 import globalPluginHandler
+import ui
 from gui import guiHelper, nvdaControls
 from gui.settingsDialogs import NVDASettingsDialog, SettingsPanel
 from logHandler import log
@@ -193,8 +194,11 @@ class DocumentFormattingTreePanel(SettingsPanel):
 	def _onBoolListChanged(self, event):
 		index = event.GetSelection()
 		option = self._boolOptions[index]
-		self._state[option.key] = self.boolList.IsChecked(index)
+		checked = self.boolList.IsChecked(index)
+		self._state[option.key] = checked
+		wx.CallAfter(ui.message, _("{label} checked" if checked else "{label} not checked").format(label=option.label))
 		self._updateDependentControls()
+		event.Skip()
 
 	def _onChoiceChanged(self, event):
 		choice = event.GetEventObject()
