@@ -48,7 +48,8 @@ class DocumentFormattingTreePanel(SettingsPanel):
 	title = _("NVDA文档设置")
 
 	def makeSettings(self, settingsSizer):
-		self._state = dict(config.conf["documentFormatting"])
+		docFormatting = config.conf["documentFormatting"]
+		self._state = {key: docFormatting[key] for key in docFormatting}
 		self._categories = self._buildCategories()
 		self._boolOptions = []
 		self._choiceControls = []
@@ -258,4 +259,6 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		for key, value in self._state.items():
 			if key in docFormatting:
 				docFormatting[key] = value
+
+
 
