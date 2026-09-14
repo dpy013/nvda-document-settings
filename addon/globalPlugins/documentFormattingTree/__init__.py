@@ -49,7 +49,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 
 	def makeSettings(self, settingsSizer):
 		docFormatting = config.conf["documentFormatting"]
-		self._state = {key: docFormatting[key] for key in docFormatting.keys()}
+		self._state = {key: docFormatting[key] for key in docFormatting}
 		self._categories = self._buildCategories()
 		self._boolOptions = []
 		self._choiceControls = []
@@ -259,6 +259,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		for key, value in self._state.items():
 			if key in docFormatting:
 				docFormatting[key] = value
+
 
 
 
