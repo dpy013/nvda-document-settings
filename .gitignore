@@ -3,3 +3,4 @@ __pycache__/
 *.nvda-addon
 *.log
 *.logfix
+developerGuide.html
