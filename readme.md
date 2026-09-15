@@ -1,5 +1,7 @@
 # NVDA Document Settings
 
+[简体中文](readme.zh-CN.md)
+
 Experimental NVDA add-on that replaces NVDA's built-in **Document formatting** settings panel while the add-on is installed.
 
 The panel is a prototype for organizing NVDA document formatting options with a category tree and a compact settings area.
