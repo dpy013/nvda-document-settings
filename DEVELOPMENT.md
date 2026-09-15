@@ -66,10 +66,10 @@ Important files:
 The project uses uv for the local development environment and SCons for packaging.
 
 ```powershell
-uv sync --dev
+.\scons.bat configure
 uv run ruff check .
 uv run ruff format --check .
-uv run scons
+.\scons.bat building
 ```
 
 The generated add-on package is:
@@ -83,7 +83,7 @@ documentFormattingTree-0.1.0.nvda-addon
 Generate the translation template with:
 
 ```powershell
-uv run scons locale/documentFormattingTree.pot
+.\scons.bat pot
 ```
 
 The template is generated from translatable `_()` strings in the add-on source.
@@ -109,3 +109,4 @@ The current target range is:
 - Last tested NVDA version: 2027.1
 
 When NVDA changes the native `DocumentFormattingPanel`, update `options.py` and the grouping/order logic in `panel.py` to match NVDA first, then adjust the prototype UI only where needed.
+

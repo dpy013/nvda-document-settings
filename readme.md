@@ -18,16 +18,16 @@ The panel is a prototype for organizing NVDA document formatting options with a 
 - Minimum NVDA version: 2026.1
 - Last tested NVDA version: 2027.1
 
-
 ## Developer notes
 
 See [DEVELOPMENT.md](DEVELOPMENT.md) for the motivation, UI model, implementation overview, and testing notes.
+
 ## Development
 
-Create/update the local uv environment:
+Build commands configure and use the local uv virtual environment automatically. To configure it explicitly, run:
 
 ```powershell
-uv sync --dev
+.\scons.bat configure
 ```
 
 Check formatting and linting:
@@ -42,10 +42,10 @@ uv run ruff format --check .
 From this directory, run:
 
 ```powershell
-uv run scons
+.\scons.bat building
 ```
 
-This creates:
+This configures `.venv` if needed and creates:
 
 ```text
 documentFormattingTree-0.1.0.nvda-addon
@@ -56,10 +56,34 @@ documentFormattingTree-0.1.0.nvda-addon
 Generate the translation template:
 
 ```powershell
-uv run scons locale/documentFormattingTree.pot
+.\scons.bat pot
 ```
 
 This creates `locale/documentFormattingTree.pot` from translatable `_()` strings.
+
+## User guide
+
+Generate the user guide:
+
+```powershell
+.\scons.bat document
+```
+
+This creates:
+
+```text
+build/userGuide.md
+```
+
+## Clean
+
+Clean build outputs and local build caches:
+
+```powershell
+.\scons.bat clear
+```
+
+This keeps `.venv` so the configured build environment can be reused.
 
 ## Install for testing
 
@@ -87,5 +111,4 @@ This creates `locale/documentFormattingTree.pot` from translatable `_()` strings
 
 - There is no settings search integration.
 - There is no custom font attributes list.
-
 
