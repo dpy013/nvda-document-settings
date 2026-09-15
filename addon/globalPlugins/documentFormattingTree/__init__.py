@@ -90,6 +90,8 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		self.choiceList = None
 		self.choiceEditorLabel = None
 		self.choiceEditor = None
+		self._modeListVisible = True
+		self._modeEditorVisible = True
 		self._currentCategoryIndex = None
 
 		helper = guiHelper.BoxSizerHelper(self, sizer=settingsSizer)
@@ -165,6 +167,8 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		self.choiceList = None
 		self.choiceEditorLabel = None
 		self.choiceEditor = None
+		self._modeListVisible = True
+		self._modeEditorVisible = True
 
 	def _showCategory(self, index):
 		try:
@@ -201,6 +205,8 @@ class DocumentFormattingTreePanel(SettingsPanel):
 				])
 				self.boolList.SetSelection(0)
 				self.boolList.Bind(wx.EVT_CHECKLISTBOX, self._onBoolListChanged)
+				self.boolList.Bind(wx.EVT_SET_FOCUS, self._onBoolListFocus)
+				self.boolList.Bind(wx.EVT_KEY_DOWN, self._onBoolListKeyDown)
 				self.categorySettingsSizer.Add(self.boolList, flag=wx.EXPAND | wx.BOTTOM, border=10)
 
 			if category.choiceOptions:
@@ -210,6 +216,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 				self.choiceList.SetSelection(0)
 				self.choiceList.Bind(wx.EVT_LISTBOX, self._onChoiceListChanged)
 				self.choiceList.Bind(wx.EVT_SET_FOCUS, self._onChoiceListFocus)
+				self.choiceList.Bind(wx.EVT_KEY_DOWN, self._onChoiceListKeyDown)
 				self.categorySettingsSizer.Add(self.choiceList, flag=wx.EXPAND | wx.BOTTOM, border=10)
 
 				self.choiceEditorLabel = wx.StaticText(self.categorySettingsPanel)
@@ -219,6 +226,10 @@ class DocumentFormattingTreePanel(SettingsPanel):
 				self.categorySettingsSizer.Add(self.choiceEditor, flag=wx.EXPAND | wx.BOTTOM, border=10)
 				self._choiceControls.append(self.choiceEditor)
 				self._showChoiceEditor(0)
+				if category.boolOptions:
+					self._setModeControlsVisible(False, False)
+				else:
+					self._setModeControlsVisible(True, True)
 
 			for option in category.spinOptions:
 				label = wx.StaticText(self.categorySettingsPanel, label=option.label)
@@ -236,6 +247,34 @@ class DocumentFormattingTreePanel(SettingsPanel):
 			self.Layout()
 		finally:
 			self.categorySettingsPanel.Thaw()
+
+	def _setModeControlsVisible(self, listVisible, editorVisible):
+		self._modeListVisible = listVisible
+		self._modeEditorVisible = editorVisible
+		if self.choiceList:
+			self.choiceList.Show(listVisible)
+		if self.choiceEditorLabel:
+			self.choiceEditorLabel.Show(editorVisible)
+		if self.choiceEditor:
+			self.choiceEditor.Show(editorVisible)
+
+	def _layoutCategorySettings(self):
+		self.categorySettingsPanel.Layout()
+		self.Layout()
+
+	def _onBoolListFocus(self, event):
+		if self.choiceList:
+			self._setModeControlsVisible(False, False)
+			self._layoutCategorySettings()
+		event.Skip()
+
+	def _onBoolListKeyDown(self, event):
+		if event.GetKeyCode() == wx.WXK_TAB and not event.ShiftDown() and self.choiceList:
+			self._setModeControlsVisible(True, False)
+			self._layoutCategorySettings()
+			self.choiceList.SetFocus()
+			return
+		event.Skip()
 
 	def _getBoolListLabels(self):
 		labels = []
@@ -289,13 +328,25 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		event.Skip()
 
 	def _onChoiceListFocus(self, event):
+		self._setModeControlsVisible(True, True)
 		selection = self.choiceList.GetSelection()
 		if selection != wx.NOT_FOUND:
 			self._showChoiceEditor(selection)
+		self._layoutCategorySettings()
 		event.Skip()
 
 	def _onChoiceListChanged(self, event):
+		self._setModeControlsVisible(True, True)
 		self._showChoiceEditor(event.GetSelection())
+		self._layoutCategorySettings()
+		event.Skip()
+
+	def _onChoiceListKeyDown(self, event):
+		if event.GetKeyCode() == wx.WXK_TAB and event.ShiftDown() and self.boolList:
+			self._setModeControlsVisible(False, False)
+			self._layoutCategorySettings()
+			self.boolList.SetFocus()
+			return
 		event.Skip()
 
 	def _showChoiceEditor(self, index):
