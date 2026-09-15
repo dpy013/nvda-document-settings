@@ -87,6 +87,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		self.choiceEditor = None
 		self.spinEditorLabel = None
 		self.spinEditor = None
+		self._activeEditorIndex = None
 		self._currentCategoryIndex = None
 
 		helper = guiHelper.BoxSizerHelper(self, sizer=settingsSizer)
@@ -159,6 +160,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		self.choiceEditor = None
 		self.spinEditorLabel = None
 		self.spinEditor = None
+		self._activeEditorIndex = None
 
 	def _showCategory(self, index):
 		try:
@@ -207,7 +209,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 			self.categorySettingsSizer.Add(self.spinEditorLabel)
 			self.categorySettingsSizer.Add(self.spinEditor, flag=wx.EXPAND | wx.BOTTOM, border=10)
 
-			self._showEditorForSelectedOption()
+			self._setEditorVisible()
 
 			self._updateDependentControls()
 			self.categorySettingsPanel.Layout()
@@ -330,16 +332,18 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		self._layoutCategorySettings()
 
 	def _onOptionListFocus(self, event):
-		self._showEditorForSelectedOption()
 		event.Skip()
 
 	def _onOptionListChanged(self, event):
-		self._showEditorForSelectedOption()
+		self._activeEditorIndex = None
+		self._setEditorVisible()
+		self._layoutCategorySettings()
 		event.Skip()
 
 	def _onOptionListKeyDown(self, event):
 		optionType, option = self._getSelectedOptionItem()
-		if event.GetKeyCode() == wx.WXK_SPACE and optionType == "bool":
+		key = event.GetKeyCode()
+		if key == wx.WXK_SPACE and optionType == "bool":
 			if not self._isBoolOptionEnabled(option):
 				wx.CallAfter(ui.message, _("{label} unavailable").format(label=option.label))
 				return
@@ -349,7 +353,12 @@ class DocumentFormattingTreePanel(SettingsPanel):
 			self._updateDependentControls()
 			wx.CallAfter(ui.message, _("{label} checked" if checked else "{label} not checked").format(label=option.label))
 			return
-		if event.GetKeyCode() == wx.WXK_TAB and not event.ShiftDown():
+		if key in (wx.WXK_SPACE, wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER) and optionType in ("choice", "spin"):
+			self._activeEditorIndex = self.optionList.GetSelection()
+			self._showEditorForSelectedOption()
+			wx.CallAfter(ui.message, _("{label} selected").format(label=option.label))
+			return
+		if key == wx.WXK_TAB and not event.ShiftDown() and self._activeEditorIndex == self.optionList.GetSelection():
 			if optionType == "choice":
 				self.choiceEditor.SetFocus()
 				return
