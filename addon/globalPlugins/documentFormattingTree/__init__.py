@@ -261,6 +261,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 	def _layoutCategorySettings(self):
 		self.categorySettingsPanel.Layout()
 		self.Layout()
+		self._sendLayoutUpdatedEvent()
 
 	def _onBoolListFocus(self, event):
 		if self.choiceList:
@@ -270,7 +271,12 @@ class DocumentFormattingTreePanel(SettingsPanel):
 
 	def _onBoolListKeyDown(self, event):
 		if event.GetKeyCode() == wx.WXK_TAB and not event.ShiftDown() and self.choiceList:
-			self._setModeControlsVisible(True, False)
+			selection = self.choiceList.GetSelection()
+			if selection == wx.NOT_FOUND:
+				selection = 0
+				self.choiceList.SetSelection(selection)
+			self._showChoiceEditor(selection)
+			self._setModeControlsVisible(True, True)
 			self._layoutCategorySettings()
 			self.choiceList.SetFocus()
 			return
