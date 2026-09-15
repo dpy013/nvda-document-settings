@@ -62,7 +62,6 @@ NVDA文档设置
   页面与间距
   表格信息
   元素
-  高级
 
 当前分类设置：
   开关选项列表
@@ -254,21 +253,12 @@ NVDA文档设置
 | 框架 | `reportFrames` | 开启 |
 | 图表和说明 | `reportFigures` | 开启 |
 | 可点击 | `reportClickable` | 开启 |
+| 报告光标后格式变化，可能导致延迟 | `detectFormatAfterCursor` | 关闭 |
 
 依赖规则：
 
 - 如果 `reportLinks` 关闭，`reportLinkType` 应禁用。
 - 保留 `reportLinkType` 的值，不因禁用而自动改写。
-
----
-
-### 5.6 高级
-
-#### 开关项
-
-| 显示名称 | 配置键 | 当前默认 |
-|---|---|---|
-| 报告光标后格式变化，可能导致延迟 | `detectFormatAfterCursor` | 关闭 |
 
 ---
 
@@ -698,5 +688,7 @@ def onSave(self):
 ```
 
 目标是减少 Tab 次数、保留清晰分类，并避免把多模式设置硬拆成多个复选框。
+
+
 
 

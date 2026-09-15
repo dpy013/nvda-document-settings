@@ -133,8 +133,8 @@ class DocumentFormattingTreePanel(SettingsPanel):
 				Option(_("Headings"), "reportHeadings"), Option(_("Links"), "reportLinks"), Option(_("Link type"), "reportLinkType"), Option(_("Graphics"), "reportGraphics"),
 				Option(_("Lists"), "reportLists"), Option(_("Block quotes"), "reportBlockQuotes"), Option(_("Groupings"), "reportGroupings"), Option(_("Landmarks and regions"), "reportLandmarks"),
 				Option(_("Articles"), "reportArticles"), Option(_("Frames"), "reportFrames"), Option(_("Figures and captions"), "reportFigures"), Option(_("Clickable"), "reportClickable"),
+				Option(_("Report formatting changes after the cursor, may cause lag"), "detectFormatAfterCursor"),
 			]),
-			Category(_("Advanced"), [Option(_("Report formatting changes after the cursor, may cause lag"), "detectFormatAfterCursor")]),
 		]
 
 	def _onCategoryChanged(self, event):
