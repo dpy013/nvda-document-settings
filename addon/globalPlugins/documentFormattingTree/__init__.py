@@ -3,7 +3,7 @@ import wx
 import config
 import globalPluginHandler
 import ui
-from gui import guiHelper, nvdaControls
+from gui import guiHelper
 from gui.settingsDialogs import NVDASettingsDialog, SettingsPanel
 import gui.settingsDialogs as settingsDialogs
 from logHandler import log
@@ -81,17 +81,12 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		docFormatting = config.conf["documentFormatting"]
 		self._state = {key: docFormatting[key] for key in docFormatting}
 		self._categories = self._buildCategories()
-		self._boolOptions = []
-		self._boolControls = []
-		self.boolList = None
-		self._choiceOptions = []
-		self._choiceControls = []
-		self._spinControls = []
-		self.choiceList = None
+		self._optionItems = []
+		self.optionList = None
 		self.choiceEditorLabel = None
 		self.choiceEditor = None
-		self._modeListVisible = True
-		self._modeEditorVisible = True
+		self.spinEditorLabel = None
+		self.spinEditor = None
 		self._currentCategoryIndex = None
 
 		helper = guiHelper.BoxSizerHelper(self, sizer=settingsSizer)
@@ -158,17 +153,12 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		for child in self.categorySettingsPanel.GetChildren():
 			child.Destroy()
 		self.categorySettingsSizer.Clear()
-		self._boolOptions = []
-		self._boolControls = []
-		self.boolList = None
-		self._choiceOptions = []
-		self._choiceControls = []
-		self._spinControls = []
-		self.choiceList = None
+		self._optionItems = []
+		self.optionList = None
 		self.choiceEditorLabel = None
 		self.choiceEditor = None
-		self._modeListVisible = True
-		self._modeEditorVisible = True
+		self.spinEditorLabel = None
+		self.spinEditor = None
 
 	def _showCategory(self, index):
 		try:
@@ -192,55 +182,32 @@ class DocumentFormattingTreePanel(SettingsPanel):
 			self._clearSettingsPanel()
 			category = self._categories[index]
 
-			if category.boolOptions:
-				self._boolOptions = category.boolOptions
-				self.boolList = nvdaControls.CustomCheckListBox(
-					self.categorySettingsPanel,
-					choices=self._getBoolListLabels(),
-				)
-				self.boolList.SetName(_("Options"))
-				self.boolList.SetCheckedItems([
-					i for i, option in enumerate(category.boolOptions)
-					if bool(self._state.get(option.key))
-				])
-				self.boolList.SetSelection(0)
-				self.boolList.Bind(wx.EVT_CHECKLISTBOX, self._onBoolListChanged)
-				self.boolList.Bind(wx.EVT_SET_FOCUS, self._onBoolListFocus)
-				self.boolList.Bind(wx.EVT_KEY_DOWN, self._onBoolListKeyDown)
-				self.categorySettingsSizer.Add(self.boolList, flag=wx.EXPAND | wx.BOTTOM, border=10)
+			self._optionItems = self._getCategoryItems(category)
+			self.optionList = wx.ListBox(
+				self.categorySettingsPanel,
+				choices=self._getOptionListLabels(),
+			)
+			self.optionList.SetName(_("Options"))
+			self.optionList.SetSelection(0)
+			self.optionList.Bind(wx.EVT_LISTBOX, self._onOptionListChanged)
+			self.optionList.Bind(wx.EVT_SET_FOCUS, self._onOptionListFocus)
+			self.optionList.Bind(wx.EVT_KEY_DOWN, self._onOptionListKeyDown)
+			self.categorySettingsSizer.Add(self.optionList, flag=wx.EXPAND | wx.BOTTOM, border=10)
 
-			if category.choiceOptions:
-				self._choiceOptions = category.choiceOptions
-				self.choiceList = wx.ListBox(self.categorySettingsPanel, choices=[option.label for option in category.choiceOptions])
-				self.choiceList.SetName(_("Mode options"))
-				self.choiceList.SetSelection(0)
-				self.choiceList.Bind(wx.EVT_LISTBOX, self._onChoiceListChanged)
-				self.choiceList.Bind(wx.EVT_SET_FOCUS, self._onChoiceListFocus)
-				self.choiceList.Bind(wx.EVT_KEY_DOWN, self._onChoiceListKeyDown)
-				self.categorySettingsSizer.Add(self.choiceList, flag=wx.EXPAND | wx.BOTTOM, border=10)
+			self.choiceEditorLabel = wx.StaticText(self.categorySettingsPanel)
+			self.choiceEditor = wx.Choice(self.categorySettingsPanel)
+			self.choiceEditor.Bind(wx.EVT_CHOICE, self._onChoiceChanged)
+			self.categorySettingsSizer.Add(self.choiceEditorLabel)
+			self.categorySettingsSizer.Add(self.choiceEditor, flag=wx.EXPAND | wx.BOTTOM, border=10)
 
-				self.choiceEditorLabel = wx.StaticText(self.categorySettingsPanel)
-				self.choiceEditor = wx.Choice(self.categorySettingsPanel)
-				self.choiceEditor.Bind(wx.EVT_CHOICE, self._onChoiceChanged)
-				self.categorySettingsSizer.Add(self.choiceEditorLabel)
-				self.categorySettingsSizer.Add(self.choiceEditor, flag=wx.EXPAND | wx.BOTTOM, border=10)
-				self._choiceControls.append(self.choiceEditor)
-				self._showChoiceEditor(0)
-				if category.boolOptions:
-					self._setModeControlsVisible(False, False)
-				else:
-					self._setModeControlsVisible(True, True)
+			self.spinEditorLabel = wx.StaticText(self.categorySettingsPanel)
+			self.spinEditor = wx.SpinCtrl(self.categorySettingsPanel)
+			self.spinEditor.Bind(wx.EVT_SPINCTRL, self._onSpinChanged)
+			self.spinEditor.Bind(wx.EVT_TEXT, self._onSpinChanged)
+			self.categorySettingsSizer.Add(self.spinEditorLabel)
+			self.categorySettingsSizer.Add(self.spinEditor, flag=wx.EXPAND | wx.BOTTOM, border=10)
 
-			for option in category.spinOptions:
-				label = wx.StaticText(self.categorySettingsPanel, label=option.label)
-				spin = wx.SpinCtrl(self.categorySettingsPanel, min=option.minimum, max=option.maximum, initial=int(self._state.get(option.key, option.minimum)))
-				spin.SetName(option.label)
-				spin.option = option
-				spin.Bind(wx.EVT_SPINCTRL, self._onSpinChanged)
-				spin.Bind(wx.EVT_TEXT, self._onSpinChanged)
-				self.categorySettingsSizer.Add(label)
-				self.categorySettingsSizer.Add(spin, flag=wx.EXPAND | wx.BOTTOM, border=10)
-				self._spinControls.append(spin)
+			self._showEditorForSelectedOption()
 
 			self._updateDependentControls()
 			self.categorySettingsPanel.Layout()
@@ -248,48 +215,42 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		finally:
 			self.categorySettingsPanel.Thaw()
 
-	def _setModeControlsVisible(self, listVisible, editorVisible):
-		self._modeListVisible = listVisible
-		self._modeEditorVisible = editorVisible
-		if self.choiceList is not None:
-			self.choiceList.Show(listVisible)
-		if self.choiceEditorLabel is not None:
-			self.choiceEditorLabel.Show(editorVisible)
-		if self.choiceEditor is not None:
-			self.choiceEditor.Show(editorVisible)
-
-	def _layoutCategorySettings(self):
-		self.categorySettingsPanel.Layout()
-		self.Layout()
-		self._sendLayoutUpdatedEvent()
-
-	def _onBoolListFocus(self, event):
-		if self.choiceList is not None:
-			self._setModeControlsVisible(False, False)
-			self._layoutCategorySettings()
-		event.Skip()
-
-	def _onBoolListKeyDown(self, event):
-		if event.GetKeyCode() == wx.WXK_TAB and not event.ShiftDown() and self.choiceList is not None:
-			selection = self.choiceList.GetSelection()
-			if selection == wx.NOT_FOUND:
-				selection = 0
-				self.choiceList.SetSelection(selection)
-			self._showChoiceEditor(selection)
-			self._setModeControlsVisible(True, True)
-			self._layoutCategorySettings()
-			self.choiceList.SetFocus()
-			return
-		event.Skip()
-
-	def _getBoolListLabels(self):
-		labels = []
-		for option in self._boolOptions:
-			label = option.label
-			if not self._isBoolOptionEnabled(option):
-				label = _("{label} (unavailable)").format(label=label)
-			labels.append(label)
-		return labels
+	def _getCategoryItems(self, category):
+		boolByKey = {option.key: option for option in category.boolOptions}
+		choiceByKey = {option.key: option for option in category.choiceOptions}
+		spinByKey = {option.key: option for option in category.spinOptions}
+		orders = {
+			"Font": [
+				("bool", "reportFontName"), ("bool", "reportFontSize"), ("choice", "fontAttributeReporting"),
+				("bool", "reportSuperscriptsAndSubscripts"), ("bool", "reportEmphasis"), ("bool", "reportHighlight"),
+				("bool", "reportStyle"), ("bool", "reportColor"),
+			],
+			"Document information": [
+				("bool", "reportComments"), ("bool", "reportBookmarks"), ("bool", "reportRevisions"),
+				("choice", "reportSpellingErrors2"),
+			],
+			"Pages and spacing": [
+				("bool", "reportPage"), ("bool", "reportLineNumber"), ("choice", "reportLineIndentation"),
+				("bool", "ignoreBlankLinesForRLI"), ("spin", "indentToneDuration"), ("bool", "reportParagraphIndentation"),
+				("bool", "reportLineSpacing"), ("bool", "reportAlignment"),
+			],
+			"Table information": [
+				("bool", "reportTables"), ("choice", "reportTableHeaders"), ("bool", "reportTableCellCoords"),
+				("choice", "reportCellBorders"),
+			],
+			"Elements": [
+				("bool", "reportHeadings"), ("bool", "reportLinks"), ("bool", "reportLinkType"), ("bool", "reportGraphics"),
+				("bool", "reportLists"), ("bool", "reportBlockQuotes"), ("bool", "reportGroupings"), ("bool", "reportLandmarks"),
+				("bool", "reportArticles"), ("bool", "reportFrames"), ("bool", "reportFigures"), ("bool", "reportClickable"),
+				("bool", "detectFormatAfterCursor"),
+			],
+		}
+		items = []
+		for optionType, key in orders.get(category.label, []):
+			option = {"bool": boolByKey, "choice": choiceByKey, "spin": spinByKey}[optionType].get(key)
+			if option is not None:
+				items.append((optionType, option))
+		return items
 
 	def _isBoolOptionEnabled(self, option):
 		if option.key == "ignoreBlankLinesForRLI":
@@ -298,76 +259,104 @@ class DocumentFormattingTreePanel(SettingsPanel):
 			return bool(self._state.get("reportLinks"))
 		return True
 
-	def _refreshBoolList(self):
-		if self.boolList is None:
+	def _getOptionListLabels(self):
+		labels = []
+		for optionType, option in self._optionItems:
+			label = option.label
+			if optionType == "bool":
+				state = _("checked") if bool(self._state.get(option.key)) else _("not checked")
+				label = _("{label}, {state}").format(label=label, state=state)
+				if not self._isBoolOptionEnabled(option):
+					label = _("{label}, unavailable").format(label=label)
+			labels.append(label)
+		return labels
+
+	def _refreshOptionList(self):
+		if self.optionList is None:
 			return
-		selection = self.boolList.GetSelection()
-		for index, label in enumerate(self._getBoolListLabels()):
-			self.boolList.SetString(index, label)
-		checked = [
-			index for index, option in enumerate(self._boolOptions)
-			if bool(self._state.get(option.key))
-		]
-		self.boolList.SetCheckedItems(checked)
-		if selection != wx.NOT_FOUND and selection < len(self._boolOptions):
-			self.boolList.SetSelection(selection)
+		selection = self.optionList.GetSelection()
+		for index, label in enumerate(self._getOptionListLabels()):
+			self.optionList.SetString(index, label)
+		if selection != wx.NOT_FOUND and selection < len(self._optionItems):
+			self.optionList.SetSelection(selection)
 
-	def _onBoolListChanged(self, event):
-		index = event.GetSelection()
-		option = self._boolOptions[index]
-		if not self._isBoolOptionEnabled(option):
-			self.boolList.Check(index, bool(self._state.get(option.key)))
-			wx.CallAfter(ui.message, _("{label} unavailable").format(label=option.label))
-			event.Skip()
-			return
-		checked = self.boolList.IsChecked(index)
-		self._state[option.key] = checked
-		wx.CallAfter(ui.message, _("{label} checked" if checked else "{label} not checked").format(label=option.label))
-		self._updateDependentControls()
-		event.Skip()
+	def _setEditorVisible(self, choiceVisible=False, spinVisible=False):
+		if self.choiceEditorLabel is not None:
+			self.choiceEditorLabel.Show(choiceVisible)
+		if self.choiceEditor is not None:
+			self.choiceEditor.Show(choiceVisible)
+		if self.spinEditorLabel is not None:
+			self.spinEditorLabel.Show(spinVisible)
+		if self.spinEditor is not None:
+			self.spinEditor.Show(spinVisible)
 
-	def _onBoolCheckChanged(self, event):
-		checkbox = event.GetEventObject()
-		option = checkbox.option
-		self._state[option.key] = checkbox.IsChecked()
-		self._updateDependentControls()
-		event.Skip()
+	def _layoutCategorySettings(self):
+		self.categorySettingsPanel.Layout()
+		self.Layout()
+		self._sendLayoutUpdatedEvent()
 
-	def _onChoiceListFocus(self, event):
-		self._setModeControlsVisible(True, True)
-		selection = self.choiceList.GetSelection()
-		if selection != wx.NOT_FOUND:
-			self._showChoiceEditor(selection)
+	def _getSelectedOptionItem(self):
+		if self.optionList is None:
+			return None, None
+		selection = self.optionList.GetSelection()
+		if selection == wx.NOT_FOUND or selection >= len(self._optionItems):
+			return None, None
+		return self._optionItems[selection]
+
+	def _showEditorForSelectedOption(self):
+		optionType, option = self._getSelectedOptionItem()
+		if optionType == "choice":
+			self.choiceEditorLabel.SetLabel(option.label)
+			self.choiceEditor.SetName(option.label)
+			self.choiceEditor.Clear()
+			for choice in option.choices:
+				self.choiceEditor.Append(choice)
+			try:
+				selection = option.values.index(self._state.get(option.key))
+			except ValueError:
+				selection = 0
+			self.choiceEditor.SetSelection(selection)
+			self.choiceEditor.option = option
+			self._setEditorVisible(choiceVisible=True)
+		elif optionType == "spin":
+			self.spinEditorLabel.SetLabel(option.label)
+			self.spinEditor.SetName(option.label)
+			self.spinEditor.SetRange(option.minimum, option.maximum)
+			self.spinEditor.SetValue(int(self._state.get(option.key, option.minimum)))
+			self.spinEditor.option = option
+			self._setEditorVisible(spinVisible=True)
+		else:
+			self._setEditorVisible()
 		self._layoutCategorySettings()
+
+	def _onOptionListFocus(self, event):
+		self._showEditorForSelectedOption()
 		event.Skip()
 
-	def _onChoiceListChanged(self, event):
-		self._setModeControlsVisible(True, True)
-		self._showChoiceEditor(event.GetSelection())
-		self._layoutCategorySettings()
+	def _onOptionListChanged(self, event):
+		self._showEditorForSelectedOption()
 		event.Skip()
 
-	def _onChoiceListKeyDown(self, event):
-		if event.GetKeyCode() == wx.WXK_TAB and event.ShiftDown() and self.boolList is not None:
-			self._setModeControlsVisible(False, False)
-			self._layoutCategorySettings()
-			self.boolList.SetFocus()
+	def _onOptionListKeyDown(self, event):
+		optionType, option = self._getSelectedOptionItem()
+		if event.GetKeyCode() == wx.WXK_SPACE and optionType == "bool":
+			if not self._isBoolOptionEnabled(option):
+				wx.CallAfter(ui.message, _("{label} unavailable").format(label=option.label))
+				return
+			checked = not bool(self._state.get(option.key))
+			self._state[option.key] = checked
+			self._refreshOptionList()
+			self._updateDependentControls()
+			wx.CallAfter(ui.message, _("{label} checked" if checked else "{label} not checked").format(label=option.label))
 			return
+		if event.GetKeyCode() == wx.WXK_TAB and not event.ShiftDown():
+			if optionType == "choice":
+				self.choiceEditor.SetFocus()
+				return
+			if optionType == "spin":
+				self.spinEditor.SetFocus()
+				return
 		event.Skip()
-
-	def _showChoiceEditor(self, index):
-		option = self._choiceOptions[index]
-		self.choiceEditorLabel.SetLabel(option.label)
-		self.choiceEditor.SetName(option.label)
-		self.choiceEditor.Clear()
-		for choice in option.choices:
-			self.choiceEditor.Append(choice)
-		try:
-			selection = option.values.index(self._state.get(option.key))
-		except ValueError:
-			selection = 0
-		self.choiceEditor.SetSelection(selection)
-		self.choiceEditor.option = option
 
 	def _onChoiceChanged(self, event):
 		choice = event.GetEventObject()
@@ -381,12 +370,13 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		self._state[option.key] = spin.GetValue()
 		event.Skip()
 
+
 	def _updateDependentControls(self):
 		reportLineIndentation = self._state.get("reportLineIndentation", 0)
-		self._refreshBoolList()
-		for spin in self._spinControls:
-			if spin.option.key == "indentToneDuration":
-				spin.Enable(reportLineIndentation in (2, 3))
+		self._refreshOptionList()
+		if self.spinEditor is not None and getattr(self.spinEditor, "option", None):
+			if self.spinEditor.option.key == "indentToneDuration":
+				self.spinEditor.Enable(reportLineIndentation in (2, 3))
 
 	def onSave(self):
 		docFormatting = config.conf["documentFormatting"]
