@@ -50,9 +50,19 @@ From this directory, run:
 This configures `.venv` if needed and creates:
 
 ```text
-documentFormattingTree-0.1.0.nvda-addon
+documentFormattingTree-<version>.nvda-addon
 ```
 
+## Version format
+
+Builds use date-based versions:
+
+- Stable release: `YY.MM`, for example `16.03` or `16.01`.
+- Development build: `YYYY.MM.DD-dev`, for example `2026.07.09-dev`.
+- Testing build: `YYYY.MM.DD-test`.
+- Pull request build: `YYYY.MM.DD-pr<PR number>`.
+
+GitHub Actions appends the workflow run number as `.build<run number>`.
 ## Localization template
 
 Generate the translation template:
@@ -86,6 +96,17 @@ Clean build outputs and local build caches:
 ```
 
 This keeps `.venv` so the configured build environment can be reused.
+
+<!-- download-links:start -->
+## Download links
+
+- Stable release: https://github.com/dpy013/nvda-document-settings/releases/latest
+- Development builds: https://github.com/dpy013/nvda-document-settings/actions/workflows/build.yml?query=branch%3Adev
+- Testing builds: https://github.com/dpy013/nvda-document-settings/actions/workflows/build.yml?query=branch%3Amain
+- Pull request builds: https://github.com/dpy013/nvda-document-settings/pulls
+
+GitHub Actions artifacts may require signing in to GitHub.
+<!-- download-links:end -->
 
 ## Install for testing
 

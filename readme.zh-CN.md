@@ -50,9 +50,19 @@ uv run ruff format --check .
 这会按需配置 `.venv`，并生成：
 
 ```text
-documentFormattingTree-0.1.0.nvda-addon
+documentFormattingTree-<version>.nvda-addon
 ```
 
+## 版本格式
+
+构建使用基于日期的版本号：
+
+- 稳定版：`YY.MM`，例如 `16.03` 或 `16.01`。
+- 开发版：`YYYY.MM.DD-dev`，例如 `2026.07.09-dev`。
+- 测试版：`YYYY.MM.DD-test`。
+- PR 构建：`YYYY.MM.DD-pr<PR 编号>`。
+
+GitHub Actions 会在后面自动追加 workflow run number，格式为 `.build<run number>`。
 ## 本地化模板
 
 生成翻译模板：
@@ -91,6 +101,17 @@ build/userGuide.md
 
 该命令会保留 `.venv`，方便后续复用已配置的构建环境。
 
+<!-- download-links:start -->
+## 下载链接
+
+- 稳定版：https://github.com/dpy013/nvda-document-settings/releases/latest
+- 开发版：https://github.com/dpy013/nvda-document-settings/actions/workflows/build.yml?query=branch%3Adev
+- 测试版：https://github.com/dpy013/nvda-document-settings/actions/workflows/build.yml?query=branch%3Amain
+- PR 构建：https://github.com/dpy013/nvda-document-settings/pulls
+
+下载 GitHub Actions 构建产物可能需要登录 GitHub。
+<!-- download-links:end -->
+
 ## 测试安装
 
 1. 构建插件。
@@ -117,3 +138,4 @@ build/userGuide.md
 
 - 暂无设置搜索集成。
 - 暂无自定义字体属性列表。
+
