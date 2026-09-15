@@ -1,6 +1,9 @@
 name: Build
 
 on:
+  release:
+    types:
+      - published
   pull_request:
   push:
     branches:
@@ -27,9 +30,27 @@ jobs:
         with:
           enable-cache: true
 
+      - name: Set build channel
+        shell: pwsh
+        run: |
+          if ('${{ github.event_name }}' -eq 'release') {
+            "ADDON_CHANNEL=stable" | Out-File -FilePath $env:GITHUB_ENV -Append
+          } elseif ('${{ github.event_name }}' -eq 'pull_request') {
+            "ADDON_CHANNEL=pr" | Out-File -FilePath $env:GITHUB_ENV -Append
+            "PR_NUMBER=${{ github.event.pull_request.number }}" | Out-File -FilePath $env:GITHUB_ENV -Append
+          } elseif ('${{ github.ref_name }}' -eq 'main') {
+            "ADDON_CHANNEL=test" | Out-File -FilePath $env:GITHUB_ENV -Append
+          } else {
+            "ADDON_CHANNEL=dev" | Out-File -FilePath $env:GITHUB_ENV -Append
+          }
+
       - name: Configure build environment
         shell: pwsh
         run: .\scons.bat configure
+
+      - name: Update download links
+        shell: pwsh
+        run: python scripts\update_download_links.py
 
       - name: Check formatting and linting
         shell: pwsh
@@ -52,8 +73,8 @@ jobs:
       - name: Upload add-on package
         uses: actions/upload-artifact@v7.0.1
         with:
-          name: nvda-document-settings-addon
-          path: documentFormattingTree-0.1.0.nvda-addon
+          name: nvda-document-settings-${{ env.ADDON_CHANNEL }}
+          path: documentFormattingTree-*.nvda-addon
 
       - name: Upload generated documents
         uses: actions/upload-artifact@v7.0.1

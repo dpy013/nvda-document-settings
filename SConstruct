@@ -1,6 +1,7 @@
 import ast
 import multiprocessing
 import os
+import re
 import shutil
 import sys
 import zipfile
@@ -20,6 +21,8 @@ from SCons.Script import (
 	Variables,
 )
 
+from scripts.version import get_version
+
 virtualEnv = os.getenv("VIRTUAL_ENV")
 uv = os.getenv("uv")
 if not virtualEnv or not uv or Path.cwd() != Path(virtualEnv).parent:
@@ -29,7 +32,8 @@ if not virtualEnv or not uv or Path.cwd() != Path(virtualEnv).parent:
 	)
 	sys.exit(1)
 
-ADDON_PACKAGE = "documentFormattingTree-0.1.0.nvda-addon"
+ADDON_VERSION = get_version()
+ADDON_PACKAGE = f"documentFormattingTree-{ADDON_VERSION}.nvda-addon"
 ADDON_SOURCE_DIR = "addon"
 BUILD_DIR = "build"
 POT_FILE = "locale/documentFormattingTree.pot"
@@ -84,7 +88,12 @@ def buildAddon(target, source, env):
 	with zipfile.ZipFile(str(target[0]), "w", zipfile.ZIP_DEFLATED) as addonZip:
 		for filePath in getAddonSources():
 			archivePath = os.path.relpath(filePath, ADDON_SOURCE_DIR)
-			addonZip.write(filePath, archivePath)
+			if archivePath == "manifest.ini":
+				content = Path(filePath).read_text(encoding="utf-8")
+				content = re.sub(r"^version\s*=\s*\".*\"$", f'version = "{ADDON_VERSION}"', content, flags=re.MULTILINE)
+				addonZip.writestr(archivePath, content)
+			else:
+				addonZip.write(filePath, archivePath)
 
 
 def escapePotString(text):
@@ -168,23 +177,25 @@ def buildDocument(target, source, env):
 
 
 def cleanBuild(target, source, env):
-	for path in [
-		ADDON_PACKAGE,
+	root = Path.cwd().resolve()
+	patterns = [
+		"documentFormattingTree-*.nvda-addon",
 		".sconsign.dblite",
 		".ruff_cache",
 		".uv-cache",
 		"__pycache__",
+		os.path.join("scripts", "__pycache__"),
 		os.path.join("addon", "globalPlugins", "documentFormattingTree", "__pycache__"),
 		BUILD_DIR,
-	]:
-		resolved = Path(path).resolve()
-		root = Path.cwd().resolve()
-		if not resolved.exists() or (resolved != root and root not in resolved.parents):
-			continue
-		if resolved.is_dir():
-			shutil.rmtree(resolved)
-		else:
-			resolved.unlink()
+	]
+	for pattern in patterns:
+		for resolved in (path.resolve() for path in Path(".").glob(pattern)):
+			if not resolved.exists() or (resolved != root and root not in resolved.parents):
+				continue
+			if resolved.is_dir():
+				shutil.rmtree(resolved)
+			else:
+				resolved.unlink()
 
 
 configure = env.Command(".venv/.configured", ["pyproject.toml", "uv.lock", "uv.toml"], configureVenv)

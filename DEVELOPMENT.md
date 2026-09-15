@@ -115,10 +115,12 @@ uv run ruff check .
 uv run ruff format --check .
 ```
 
-The generated add-on package is:
+The generated add-on package uses the selected channel version, for example:
 
 ```text
-documentFormattingTree-0.1.0.nvda-addon
+documentFormattingTree-2026.07.09-dev.nvda-addon
+documentFormattingTree-2026.07.09-pr12.nvda-addon
+documentFormattingTree-26.07.nvda-addon
 ```
 
 The generated localization template is:
@@ -154,3 +156,4 @@ The current target range is:
 - Last tested NVDA version: 2027.1
 
 When NVDA changes the native `DocumentFormattingPanel`, update `options.py` and the grouping/order logic in `panel.py` to match NVDA first, then adjust the prototype UI only where needed.
+
