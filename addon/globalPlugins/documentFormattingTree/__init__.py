@@ -276,10 +276,15 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		event.Skip()
 
 	def _updateDependentControls(self):
-		enableToneDuration = self._state.get("reportLineIndentation", 0) in (2, 3)
+		reportLineIndentation = self._state.get("reportLineIndentation", 0)
+		for checkbox in self._boolControls:
+			if checkbox.option.key == "ignoreBlankLinesForRLI":
+				checkbox.Enable(reportLineIndentation != 0)
+			elif checkbox.option.key == "reportLinkType":
+				checkbox.Enable(bool(self._state.get("reportLinks")))
 		for spin in self._spinControls:
 			if spin.option.key == "indentToneDuration":
-				spin.Enable(enableToneDuration)
+				spin.Enable(reportLineIndentation in (2, 3))
 
 	def onSave(self):
 		docFormatting = config.conf["documentFormatting"]
