@@ -18,6 +18,10 @@ The panel is a prototype for organizing NVDA document formatting options with a 
 - Minimum NVDA version: 2026.1
 - Last tested NVDA version: 2027.1
 
+
+## Developer notes
+
+See [DEVELOPMENT.md](DEVELOPMENT.md) for the motivation, UI model, implementation overview, and testing notes.
 ## Development
 
 Create/update the local uv environment:
@@ -83,4 +87,5 @@ This creates `locale/documentFormattingTree.pot` from translatable `_()` strings
 
 - There is no settings search integration.
 - There is no custom font attributes list.
+
 
