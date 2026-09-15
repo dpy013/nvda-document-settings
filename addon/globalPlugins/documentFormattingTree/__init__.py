@@ -3,7 +3,7 @@ import wx
 import config
 import globalPluginHandler
 import ui
-from gui import guiHelper
+from gui import guiHelper, nvdaControls
 from gui.settingsDialogs import NVDASettingsDialog, SettingsPanel
 import gui.settingsDialogs as settingsDialogs
 from logHandler import log
@@ -87,6 +87,8 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		self.choiceEditor = None
 		self.spinEditorLabel = None
 		self.spinEditor = None
+		self.multiEditorLabel = None
+		self.multiEditor = None
 		self._activeEditorIndex = None
 		self._currentCategoryIndex = None
 
@@ -121,7 +123,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 				Option(_("Highlighted text"), "reportHighlight"), Option(_("Style"), "reportStyle"), Option(_("Color"), "reportColor"),
 			], [Option(_("Font attributes"), "fontAttributeReporting", [_('Off'), _('Speech'), _('Braille'), _('Speech and braille')], [0, 1, 2, 3])]),
 			Category(_("Document information"), [Option(_("Comments"), "reportComments"), Option(_("Bookmarks"), "reportBookmarks"), Option(_("Editor revisions"), "reportRevisions")], [
-				Option(_("Spelling or grammar errors"), "reportSpellingErrors2", [_('Off'), _('Speech'), _('Sound'), _('Braille'), _('Speech and sound'), _('Speech and braille'), _('Sound and braille'), _('Speech, sound and braille')], [0, 1, 2, 4, 3, 5, 6, 7])
+				Option(_("Spelling or grammar errors"), "reportSpellingErrors2", [_('Speech'), _('Sound'), _('Braille')], [1, 2, 4])
 			]),
 			Category(_("Pages and spacing"), [
 				Option(_("Pages"), "reportPage"), Option(_("Line numbers"), "reportLineNumber"), Option(_("Ignore blank lines for line indentation reporting"), "ignoreBlankLinesForRLI"),
@@ -160,6 +162,8 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		self.choiceEditor = None
 		self.spinEditorLabel = None
 		self.spinEditor = None
+		self.multiEditorLabel = None
+		self.multiEditor = None
 		self._activeEditorIndex = None
 
 	def _showCategory(self, index):
@@ -209,6 +213,12 @@ class DocumentFormattingTreePanel(SettingsPanel):
 			self.categorySettingsSizer.Add(self.spinEditorLabel)
 			self.categorySettingsSizer.Add(self.spinEditor, flag=wx.EXPAND | wx.BOTTOM, border=10)
 
+			self.multiEditorLabel = wx.StaticText(self.categorySettingsPanel)
+			self.multiEditor = nvdaControls.CustomCheckListBox(self.categorySettingsPanel)
+			self.multiEditor.Bind(wx.EVT_CHECKLISTBOX, self._onMultiChanged)
+			self.categorySettingsSizer.Add(self.multiEditorLabel)
+			self.categorySettingsSizer.Add(self.multiEditor, flag=wx.EXPAND | wx.BOTTOM, border=10)
+
 			self._setEditorVisible()
 
 			self._updateDependentControls()
@@ -229,7 +239,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 			],
 			"Document information": [
 				("bool", "reportComments"), ("bool", "reportBookmarks"), ("bool", "reportRevisions"),
-				("choice", "reportSpellingErrors2"),
+				("multi", "reportSpellingErrors2"),
 			],
 			"Pages and spacing": [
 				("bool", "reportPage"), ("bool", "reportLineNumber"), ("choice", "reportLineIndentation"),
@@ -249,7 +259,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		}
 		items = []
 		for optionType, key in orders.get(category.label, []):
-			option = {"bool": boolByKey, "choice": choiceByKey, "spin": spinByKey}[optionType].get(key)
+			option = {"bool": boolByKey, "choice": choiceByKey, "multi": choiceByKey, "spin": spinByKey}[optionType].get(key)
 			if option is not None:
 				items.append((optionType, option))
 		return items
@@ -282,7 +292,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		if selection != wx.NOT_FOUND and selection < len(self._optionItems):
 			self.optionList.SetSelection(selection)
 
-	def _setEditorVisible(self, choiceVisible=False, spinVisible=False):
+	def _setEditorVisible(self, choiceVisible=False, spinVisible=False, multiVisible=False):
 		if self.choiceEditorLabel is not None:
 			self.choiceEditorLabel.Show(choiceVisible)
 		if self.choiceEditor is not None:
@@ -291,6 +301,10 @@ class DocumentFormattingTreePanel(SettingsPanel):
 			self.spinEditorLabel.Show(spinVisible)
 		if self.spinEditor is not None:
 			self.spinEditor.Show(spinVisible)
+		if self.multiEditorLabel is not None:
+			self.multiEditorLabel.Show(multiVisible)
+		if self.multiEditor is not None:
+			self.multiEditor.Show(multiVisible)
 
 	def _layoutCategorySettings(self):
 		self.categorySettingsPanel.Layout()
@@ -327,6 +341,20 @@ class DocumentFormattingTreePanel(SettingsPanel):
 			self.spinEditor.SetValue(int(self._state.get(option.key, option.minimum)))
 			self.spinEditor.option = option
 			self._setEditorVisible(spinVisible=True)
+		elif optionType == "multi":
+			self.multiEditorLabel.SetLabel(option.label)
+			self.multiEditor.SetName(option.label)
+			self.multiEditor.Clear()
+			for choice in option.choices:
+				self.multiEditor.Append(choice)
+			currentValue = self._state.get(option.key, 0)
+			self.multiEditor.SetCheckedItems([
+				index for index, value in enumerate(option.values)
+				if currentValue & value
+			])
+			self.multiEditor.SetSelection(0)
+			self.multiEditor.option = option
+			self._setEditorVisible(multiVisible=True)
 		else:
 			self._setEditorVisible()
 		self._layoutCategorySettings()
@@ -353,7 +381,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 			self._updateDependentControls()
 			wx.CallAfter(ui.message, _("{label} checked" if checked else "{label} not checked").format(label=option.label))
 			return
-		if key in (wx.WXK_SPACE, wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER) and optionType in ("choice", "spin"):
+		if key in (wx.WXK_SPACE, wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER) and optionType in ("choice", "spin", "multi"):
 			self._activeEditorIndex = self.optionList.GetSelection()
 			self._showEditorForSelectedOption()
 			wx.CallAfter(ui.message, _("{label} selected").format(label=option.label))
@@ -365,6 +393,18 @@ class DocumentFormattingTreePanel(SettingsPanel):
 			if optionType == "spin":
 				self.spinEditor.SetFocus()
 				return
+			if optionType == "multi":
+				self.multiEditor.SetFocus()
+				return
+		event.Skip()
+
+	def _onMultiChanged(self, event):
+		option = self.multiEditor.option
+		value = 0
+		for index, optionValue in enumerate(option.values):
+			if self.multiEditor.IsChecked(index):
+				value |= optionValue
+		self._state[option.key] = value
 		event.Skip()
 
 	def _onChoiceChanged(self, event):
@@ -378,7 +418,6 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		option = spin.option
 		self._state[option.key] = spin.GetValue()
 		event.Skip()
-
 
 	def _updateDependentControls(self):
 		reportLineIndentation = self._state.get("reportLineIndentation", 0)
