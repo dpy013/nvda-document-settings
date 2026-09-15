@@ -1,0 +1,280 @@
+# Translations template for NVDA Document Settings.
+# Copyright (C) 2026 NVDA Document Settings contributors
+# This file is distributed under the same license as the NVDA Document Settings add-on.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: documentFormattingTree 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-15 10:24+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: addon/globalPlugins/documentFormattingTree/options.py:75
+msgid "Alignment"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:116
+msgid "Articles"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:113
+msgid "Block quotes"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:55
+msgid "Bookmarks"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:46
+#: addon/globalPlugins/documentFormattingTree/options.py:62
+msgid "Braille"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/panel.py:44
+msgid "Categories"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:102
+msgid "Cell borders"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:93
+msgid "Cell coordinates"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:119
+msgid "Clickable"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:40
+msgid "Color"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:102
+msgid "Color and style"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:99
+msgid "Columns"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:54
+msgid "Comments"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/panel.py:22
+msgid "Document formatting"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:52
+msgid "Document information"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:56
+msgid "Editor revisions"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:106
+msgid "Elements"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:37
+msgid "Emphasis"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:118
+msgid "Figures and captions"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:32
+msgid "Font"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:44
+msgid "Font attributes"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:34
+msgid "Font name"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:35
+msgid "Font size"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:117
+msgid "Frames"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:111
+msgid "Graphics"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:114
+msgid "Groupings"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:97
+msgid "Headers"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:108
+msgid "Headings"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:38
+msgid "Highlighted text"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:72
+msgid "Ignore blank lines for line indentation reporting"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:86
+msgid "Indent tone duration (ms)"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:115
+msgid "Landmarks and regions"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:79
+msgid "Line indentation reporting"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:71
+msgid "Line numbers"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:74
+msgid "Line spacing"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:110
+msgid "Link type"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:109
+msgid "Links"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:112
+msgid "Lists"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:46
+#: addon/globalPlugins/documentFormattingTree/options.py:81
+#: addon/globalPlugins/documentFormattingTree/options.py:99
+#: addon/globalPlugins/documentFormattingTree/options.py:102
+msgid "Off"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/panel.py:112
+msgid "Options"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:70
+msgid "Pages"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:68
+msgid "Pages and spacing"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:73
+msgid "Paragraph indentation"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:120
+msgid "Report formatting changes after the cursor (can cause a lag)"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:99
+msgid "Rows"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:99
+msgid "Rows and columns"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:62
+msgid "Sound"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:46
+#: addon/globalPlugins/documentFormattingTree/options.py:62
+#: addon/globalPlugins/documentFormattingTree/options.py:81
+msgid "Speech"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:46
+msgid "Speech and braille"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:81
+msgid "Speech and tones"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:60
+msgid "Spelling or grammar errors"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:39
+#: addon/globalPlugins/documentFormattingTree/options.py:102
+msgid "Style"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:36
+msgid "Superscripts and subscripts"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:90
+msgid "Table information"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:92
+msgid "Tables"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/options.py:81
+msgid "Tones"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/panel.py:220
+msgid "checked"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/panel.py:220
+msgid "not checked"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/panel.py:323
+msgid "{label} checked"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/panel.py:323
+msgid "{label} not checked"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/panel.py:329
+msgid "{label} selected"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/panel.py:316
+msgid "{label} unavailable"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/panel.py:223
+msgid "{label}, unavailable"
+msgstr ""
+
+#: addon/globalPlugins/documentFormattingTree/panel.py:221
+msgid "{label}, {state}"
+msgstr ""
+

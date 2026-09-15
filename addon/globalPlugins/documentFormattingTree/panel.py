@@ -320,7 +320,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 			self._refreshOptionList()
 			self._updateDependentControls()
 			wx.CallAfter(
-				ui.message, _("{label} checked" if checked else "{label} not checked").format(label=option.label)
+				ui.message, (_("{label} checked") if checked else _("{label} not checked")).format(label=option.label)
 			)
 			return
 		if key in (wx.WXK_SPACE, wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER) and optionType in ("choice", "spin", "multi"):

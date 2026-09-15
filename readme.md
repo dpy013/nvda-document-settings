@@ -47,6 +47,16 @@ This creates:
 documentFormattingTree-0.1.0.nvda-addon
 ```
 
+## Localization template
+
+Generate the translation template:
+
+```powershell
+uv run scons locale/documentFormattingTree.pot
+```
+
+This creates `locale/documentFormattingTree.pot` from translatable `_()` strings.
+
 ## Install for testing
 
 1. Build the add-on.
