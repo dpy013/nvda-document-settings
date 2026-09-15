@@ -23,7 +23,7 @@ The panel is a prototype for organizing NVDA document formatting options with a 
 From this directory, run:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\build.ps1
+python -m SCons
 ```
 
 This creates:
@@ -56,7 +56,6 @@ documentFormattingTree-0.1.0.nvda-addon
 
 ## Known limitations
 
-- This prototype does not replace NVDA's built-in Document Formatting panel.
-- `Link type` is not disabled when `Links` is off.
 - There is no settings search integration.
 - There is no custom font attributes list.
+
