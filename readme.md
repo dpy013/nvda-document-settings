@@ -18,12 +18,27 @@ The panel is a prototype for organizing NVDA document formatting options with a 
 - Minimum NVDA version: 2026.1
 - Last tested NVDA version: 2027.1
 
+## Development
+
+Create/update the local uv environment:
+
+```powershell
+uv sync --dev
+```
+
+Check formatting and linting:
+
+```powershell
+uv run ruff check .
+uv run ruff format --check .
+```
+
 ## Build
 
 From this directory, run:
 
 ```powershell
-python -m SCons
+uv run scons
 ```
 
 This creates:

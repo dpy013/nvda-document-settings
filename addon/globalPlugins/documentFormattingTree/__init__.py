@@ -1,9 +1,10 @@
 import globalPluginHandler
-from gui.settingsDialogs import NVDASettingsDialog
 import gui.settingsDialogs as settingsDialogs
+from gui.settingsDialogs import NVDASettingsDialog
 
 try:
 	import addonHandler
+
 	addonHandler.initTranslation()
 except Exception:
 	_ = lambda text: text

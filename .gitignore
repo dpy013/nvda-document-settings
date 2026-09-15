@@ -5,3 +5,6 @@ __pycache__/
 *.logfix
 developerGuide.html
 .sconsign.dblite
+.venv/
+.uv-cache/
+.ruff_cache/

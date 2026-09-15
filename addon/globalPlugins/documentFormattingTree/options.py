@@ -1,12 +1,15 @@
 try:
 	import addonHandler
+
 	addonHandler.initTranslation()
 except Exception:
 	_ = lambda text: text
 
 
 class Option:
-	def __init__(self, label: str, key: str, choices=None, values=None, minimum: int | None = None, maximum: int | None = None):
+	def __init__(
+		self, label: str, key: str, choices=None, values=None, minimum: int | None = None, maximum: int | None = None
+	):
 		self.label = label
 		self.key = key
 		self.choices = choices or []
@@ -40,7 +43,7 @@ def buildCategories() -> list[Category]:
 				Option(
 					_("Font attributes"),
 					"fontAttributeReporting",
-					[_('Off'), _('Speech'), _('Braille'), _('Speech and braille')],
+					[_("Off"), _("Speech"), _("Braille"), _("Speech and braille")],
 					[0, 1, 2, 3],
 				),
 			],
@@ -53,7 +56,12 @@ def buildCategories() -> list[Category]:
 				Option(_("Editor revisions"), "reportRevisions"),
 			],
 			[
-				Option(_("Spelling or grammar errors"), "reportSpellingErrors2", [_('Speech'), _('Sound'), _('Braille')], [1, 2, 4]),
+				Option(
+					_("Spelling or grammar errors"),
+					"reportSpellingErrors2",
+					[_("Speech"), _("Sound"), _("Braille")],
+					[1, 2, 4],
+				),
 			],
 		),
 		Category(
@@ -67,7 +75,12 @@ def buildCategories() -> list[Category]:
 				Option(_("Alignment"), "reportAlignment"),
 			],
 			[
-				Option(_("Line indentation reporting"), "reportLineIndentation", [_('Off'), _('Speech'), _('Tones'), _('Speech and tones')], [0, 1, 2, 3]),
+				Option(
+					_("Line indentation reporting"),
+					"reportLineIndentation",
+					[_("Off"), _("Speech"), _("Tones"), _("Speech and tones")],
+					[0, 1, 2, 3],
+				),
 			],
 			[
 				Option(_("Indent tone duration (ms)"), "indentToneDuration", minimum=10, maximum=2000),
@@ -80,8 +93,13 @@ def buildCategories() -> list[Category]:
 				Option(_("Cell coordinates"), "reportTableCellCoords"),
 			],
 			[
-				Option(_("Headers"), "reportTableHeaders", [_('Off'), _('Rows and columns'), _('Rows'), _('Columns')], [0, 1, 2, 3]),
-				Option(_("Cell borders"), "reportCellBorders", [_('Off'), _('Style'), _('Color and style')], [0, 1, 2]),
+				Option(
+					_("Headers"),
+					"reportTableHeaders",
+					[_("Off"), _("Rows and columns"), _("Rows"), _("Columns")],
+					[0, 1, 2, 3],
+				),
+				Option(_("Cell borders"), "reportCellBorders", [_("Off"), _("Style"), _("Color and style")], [0, 1, 2]),
 			],
 		),
 		Category(

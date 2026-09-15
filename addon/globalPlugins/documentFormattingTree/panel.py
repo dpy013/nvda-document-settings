@@ -1,13 +1,13 @@
-import wx
-
 import config
 import ui
+import wx
 from gui import guiHelper, nvdaControls
 from gui.settingsDialogs import SettingsPanel
 from logHandler import log
 
 try:
 	import addonHandler
+
 	addonHandler.initTranslation()
 except Exception:
 	_ = lambda text: text
@@ -149,33 +149,58 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		spinByKey = {option.key: option for option in category.spinOptions}
 		orders = {
 			"Font": [
-				("bool", "reportFontName"), ("bool", "reportFontSize"), ("choice", "fontAttributeReporting"),
-				("bool", "reportSuperscriptsAndSubscripts"), ("bool", "reportEmphasis"), ("bool", "reportHighlight"),
-				("bool", "reportStyle"), ("bool", "reportColor"),
+				("bool", "reportFontName"),
+				("bool", "reportFontSize"),
+				("choice", "fontAttributeReporting"),
+				("bool", "reportSuperscriptsAndSubscripts"),
+				("bool", "reportEmphasis"),
+				("bool", "reportHighlight"),
+				("bool", "reportStyle"),
+				("bool", "reportColor"),
 			],
 			"Document information": [
-				("bool", "reportComments"), ("bool", "reportBookmarks"), ("bool", "reportRevisions"),
+				("bool", "reportComments"),
+				("bool", "reportBookmarks"),
+				("bool", "reportRevisions"),
 				("multi", "reportSpellingErrors2"),
 			],
 			"Pages and spacing": [
-				("bool", "reportPage"), ("bool", "reportLineNumber"), ("choice", "reportLineIndentation"),
-				("bool", "ignoreBlankLinesForRLI"), ("spin", "indentToneDuration"), ("bool", "reportParagraphIndentation"),
-				("bool", "reportLineSpacing"), ("bool", "reportAlignment"),
+				("bool", "reportPage"),
+				("bool", "reportLineNumber"),
+				("choice", "reportLineIndentation"),
+				("bool", "ignoreBlankLinesForRLI"),
+				("spin", "indentToneDuration"),
+				("bool", "reportParagraphIndentation"),
+				("bool", "reportLineSpacing"),
+				("bool", "reportAlignment"),
 			],
 			"Table information": [
-				("bool", "reportTables"), ("choice", "reportTableHeaders"), ("bool", "reportTableCellCoords"),
+				("bool", "reportTables"),
+				("choice", "reportTableHeaders"),
+				("bool", "reportTableCellCoords"),
 				("choice", "reportCellBorders"),
 			],
 			"Elements": [
-				("bool", "reportHeadings"), ("bool", "reportLinks"), ("bool", "reportLinkType"), ("bool", "reportGraphics"),
-				("bool", "reportLists"), ("bool", "reportBlockQuotes"), ("bool", "reportGroupings"), ("bool", "reportLandmarks"),
-				("bool", "reportArticles"), ("bool", "reportFrames"), ("bool", "reportFigures"), ("bool", "reportClickable"),
+				("bool", "reportHeadings"),
+				("bool", "reportLinks"),
+				("bool", "reportLinkType"),
+				("bool", "reportGraphics"),
+				("bool", "reportLists"),
+				("bool", "reportBlockQuotes"),
+				("bool", "reportGroupings"),
+				("bool", "reportLandmarks"),
+				("bool", "reportArticles"),
+				("bool", "reportFrames"),
+				("bool", "reportFigures"),
+				("bool", "reportClickable"),
 				("bool", "detectFormatAfterCursor"),
 			],
 		}
 		items = []
 		for optionType, key in orders.get(category.label, []):
-			option = {"bool": boolByKey, "choice": choiceByKey, "multi": choiceByKey, "spin": spinByKey}[optionType].get(key)
+			option = {"bool": boolByKey, "choice": choiceByKey, "multi": choiceByKey, "spin": spinByKey}[
+				optionType
+			].get(key)
 			if option is not None:
 				items.append((optionType, option))
 		return items
@@ -264,10 +289,9 @@ class DocumentFormattingTreePanel(SettingsPanel):
 			for choice in option.choices:
 				self.multiEditor.Append(choice)
 			currentValue = self._state.get(option.key, 0)
-			self.multiEditor.SetCheckedItems([
-				index for index, value in enumerate(option.values)
-				if currentValue & value
-			])
+			self.multiEditor.SetCheckedItems(
+				[index for index, value in enumerate(option.values) if currentValue & value]
+			)
 			self.multiEditor.SetSelection(0)
 			self.multiEditor.option = option
 			self._setEditorVisible(multiVisible=True)
@@ -295,7 +319,9 @@ class DocumentFormattingTreePanel(SettingsPanel):
 			self._state[option.key] = checked
 			self._refreshOptionList()
 			self._updateDependentControls()
-			wx.CallAfter(ui.message, _("{label} checked" if checked else "{label} not checked").format(label=option.label))
+			wx.CallAfter(
+				ui.message, _("{label} checked" if checked else "{label} not checked").format(label=option.label)
+			)
 			return
 		if key in (wx.WXK_SPACE, wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER) and optionType in ("choice", "spin", "multi"):
 			self._activeEditorIndex = self.optionList.GetSelection()
