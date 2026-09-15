@@ -82,6 +82,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		self._state = {key: docFormatting[key] for key in docFormatting}
 		self._categories = self._buildCategories()
 		self._boolOptions = []
+		self._choiceOptions = []
 		self._choiceControls = []
 		self._spinControls = []
 		self._currentCategoryIndex = None
@@ -151,8 +152,12 @@ class DocumentFormattingTreePanel(SettingsPanel):
 			child.Destroy()
 		self.categorySettingsSizer.Clear()
 		self._boolOptions = []
+		self._choiceOptions = []
 		self._choiceControls = []
 		self._spinControls = []
+		self.choiceList = None
+		self.choiceEditorLabel = None
+		self.choiceEditor = None
 		self.boolList = None
 
 	def _showCategory(self, index):
@@ -188,20 +193,22 @@ class DocumentFormattingTreePanel(SettingsPanel):
 				self.boolList.Bind(wx.EVT_CHECKLISTBOX, self._onBoolListChanged)
 				self.categorySettingsSizer.Add(self.boolList, flag=wx.EXPAND | wx.BOTTOM, border=10)
 
-			for option in category.choiceOptions:
-				label = wx.StaticText(self.categorySettingsPanel, label=option.label)
-				choice = wx.Choice(self.categorySettingsPanel, choices=list(option.choices))
-				choice.SetName(option.label)
-				try:
-					selection = option.values.index(self._state.get(option.key))
-				except ValueError:
-					selection = 0
-				choice.SetSelection(selection)
-				choice.option = option
-				choice.Bind(wx.EVT_CHOICE, self._onChoiceChanged)
-				self.categorySettingsSizer.Add(label)
-				self.categorySettingsSizer.Add(choice, flag=wx.EXPAND | wx.BOTTOM, border=10)
-				self._choiceControls.append(choice)
+			if category.choiceOptions:
+				self._choiceOptions = category.choiceOptions
+				self.choiceList = wx.ListBox(self.categorySettingsPanel, choices=[option.label for option in category.choiceOptions])
+				self.choiceList.SetName(_("Mode options"))
+				self.choiceList.SetSelection(0)
+				self.choiceList.Bind(wx.EVT_LISTBOX, self._onChoiceListChanged)
+				self.choiceList.Bind(wx.EVT_SET_FOCUS, self._onChoiceListFocus)
+				self.categorySettingsSizer.Add(self.choiceList, flag=wx.EXPAND | wx.BOTTOM, border=10)
+
+				self.choiceEditorLabel = wx.StaticText(self.categorySettingsPanel)
+				self.choiceEditor = wx.Choice(self.categorySettingsPanel)
+				self.choiceEditor.Bind(wx.EVT_CHOICE, self._onChoiceChanged)
+				self.categorySettingsSizer.Add(self.choiceEditorLabel)
+				self.categorySettingsSizer.Add(self.choiceEditor, flag=wx.EXPAND | wx.BOTTOM, border=10)
+				self._choiceControls.append(self.choiceEditor)
+				self._showChoiceEditor(0)
 
 			for option in category.spinOptions:
 				label = wx.StaticText(self.categorySettingsPanel, label=option.label)
@@ -228,6 +235,30 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		wx.CallAfter(ui.message, _("{label} checked" if checked else "{label} not checked").format(label=option.label))
 		self._updateDependentControls()
 		event.Skip()
+
+	def _onChoiceListFocus(self, event):
+		selection = self.choiceList.GetSelection()
+		if selection != wx.NOT_FOUND:
+			self._showChoiceEditor(selection)
+		event.Skip()
+
+	def _onChoiceListChanged(self, event):
+		self._showChoiceEditor(event.GetSelection())
+		event.Skip()
+
+	def _showChoiceEditor(self, index):
+		option = self._choiceOptions[index]
+		self.choiceEditorLabel.SetLabel(option.label)
+		self.choiceEditor.SetName(option.label)
+		self.choiceEditor.Clear()
+		for choice in option.choices:
+			self.choiceEditor.Append(choice)
+		try:
+			selection = option.values.index(self._state.get(option.key))
+		except ValueError:
+			selection = 0
+		self.choiceEditor.SetSelection(selection)
+		self.choiceEditor.option = option
 
 	def _onChoiceChanged(self, event):
 		choice = event.GetEventObject()
