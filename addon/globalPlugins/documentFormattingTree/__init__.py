@@ -251,11 +251,11 @@ class DocumentFormattingTreePanel(SettingsPanel):
 	def _setModeControlsVisible(self, listVisible, editorVisible):
 		self._modeListVisible = listVisible
 		self._modeEditorVisible = editorVisible
-		if self.choiceList:
+		if self.choiceList is not None:
 			self.choiceList.Show(listVisible)
-		if self.choiceEditorLabel:
+		if self.choiceEditorLabel is not None:
 			self.choiceEditorLabel.Show(editorVisible)
-		if self.choiceEditor:
+		if self.choiceEditor is not None:
 			self.choiceEditor.Show(editorVisible)
 
 	def _layoutCategorySettings(self):
@@ -264,13 +264,13 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		self._sendLayoutUpdatedEvent()
 
 	def _onBoolListFocus(self, event):
-		if self.choiceList:
+		if self.choiceList is not None:
 			self._setModeControlsVisible(False, False)
 			self._layoutCategorySettings()
 		event.Skip()
 
 	def _onBoolListKeyDown(self, event):
-		if event.GetKeyCode() == wx.WXK_TAB and not event.ShiftDown() and self.choiceList:
+		if event.GetKeyCode() == wx.WXK_TAB and not event.ShiftDown() and self.choiceList is not None:
 			selection = self.choiceList.GetSelection()
 			if selection == wx.NOT_FOUND:
 				selection = 0
@@ -299,7 +299,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		return True
 
 	def _refreshBoolList(self):
-		if not self.boolList:
+		if self.boolList is None:
 			return
 		selection = self.boolList.GetSelection()
 		for index, label in enumerate(self._getBoolListLabels()):
@@ -348,7 +348,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		event.Skip()
 
 	def _onChoiceListKeyDown(self, event):
-		if event.GetKeyCode() == wx.WXK_TAB and event.ShiftDown() and self.boolList:
+		if event.GetKeyCode() == wx.WXK_TAB and event.ShiftDown() and self.boolList is not None:
 			self._setModeControlsVisible(False, False)
 			self._layoutCategorySettings()
 			self.boolList.SetFocus()
