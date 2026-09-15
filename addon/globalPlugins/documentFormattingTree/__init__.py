@@ -84,6 +84,8 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		self._boolOptions = []
 		self._choiceControls = []
 		self._spinControls = []
+		self._extraControls = []
+		self._extraControlsVisible = True
 		self._currentCategoryIndex = None
 
 		helper = guiHelper.BoxSizerHelper(self, sizer=settingsSizer)
@@ -153,6 +155,8 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		self._boolOptions = []
 		self._choiceControls = []
 		self._spinControls = []
+		self._extraControls = []
+		self._extraControlsVisible = True
 		self.boolList = None
 
 	def _showCategory(self, index):
@@ -177,13 +181,16 @@ class DocumentFormattingTreePanel(SettingsPanel):
 			self._clearSettingsPanel()
 			category = self._categories[index]
 
-			if category.boolOptions:
+			hasBoolOptions = bool(category.boolOptions)
+			if hasBoolOptions:
 				self._boolOptions = category.boolOptions
 				self.boolList = nvdaControls.CustomCheckListBox(self.categorySettingsPanel, choices=[option.label for option in category.boolOptions])
 				self.boolList.SetName(_("Options"))
 				self.boolList.SetCheckedItems([i for i, option in enumerate(category.boolOptions) if bool(self._state.get(option.key))])
 				self.boolList.SetSelection(0)
 				self.boolList.Bind(wx.EVT_CHECKLISTBOX, self._onBoolListChanged)
+				self.boolList.Bind(wx.EVT_KEY_DOWN, self._onBoolListKeyDown)
+				self.boolList.Bind(wx.EVT_SET_FOCUS, self._onBoolListFocus)
 				self.categorySettingsSizer.Add(self.boolList, flag=wx.EXPAND | wx.BOTTOM, border=10)
 
 			for option in category.choiceOptions:
@@ -200,6 +207,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 				self.categorySettingsSizer.Add(label)
 				self.categorySettingsSizer.Add(choice, flag=wx.EXPAND | wx.BOTTOM, border=10)
 				self._choiceControls.append(choice)
+				self._extraControls.extend([label, choice])
 
 			for option in category.spinOptions:
 				label = wx.StaticText(self.categorySettingsPanel, label=option.label)
@@ -211,12 +219,36 @@ class DocumentFormattingTreePanel(SettingsPanel):
 				self.categorySettingsSizer.Add(label)
 				self.categorySettingsSizer.Add(spin, flag=wx.EXPAND | wx.BOTTOM, border=10)
 				self._spinControls.append(spin)
+				self._extraControls.extend([label, spin])
 
+			if hasBoolOptions and self._extraControls:
+				self._setExtraControlsVisible(False)
 			self._updateDependentControls()
 			self.categorySettingsPanel.Layout()
 			self.Layout()
 		finally:
 			self.categorySettingsPanel.Thaw()
+
+	def _setExtraControlsVisible(self, visible):
+		self._extraControlsVisible = visible
+		for control in self._extraControls:
+			control.Show(visible)
+
+	def _onBoolListFocus(self, event):
+		if self._extraControls:
+			self._setExtraControlsVisible(False)
+			self.categorySettingsPanel.Layout()
+		event.Skip()
+
+	def _onBoolListKeyDown(self, event):
+		if event.GetKeyCode() == wx.WXK_TAB and not event.ShiftDown() and self._extraControls:
+			self._setExtraControlsVisible(True)
+			self.categorySettingsPanel.Layout()
+			for control in self._extraControls:
+				if isinstance(control, (wx.Choice, wx.SpinCtrl)):
+					control.SetFocus()
+					return
+		event.Skip()
 
 	def _onBoolListChanged(self, event):
 		index = event.GetSelection()
