@@ -1,12 +1,12 @@
 # NVDA Document Settings
 
-Experimental NVDA add-on that adds an **NVDA Document Settings** panel to NVDA Settings.
+Experimental NVDA add-on that replaces NVDA's built-in **Document formatting** settings panel while the add-on is installed.
 
 The panel is a prototype for organizing NVDA document formatting options with a category tree and a compact settings area.
 
 ## Features
 
-- Adds a new category to NVDA Settings: **NVDA Document Settings**.
+- Replaces NVDA's built-in **Document formatting** settings category while the add-on is installed.
 - Uses a tree view for document formatting categories.
 - Uses a check list for boolean options.
 - Uses combo boxes for multi-value reporting modes.
@@ -39,7 +39,7 @@ documentFormattingTree-0.1.0.nvda-addon
 3. Allow NVDA to install it.
 4. Restart NVDA when prompted.
 5. Open **NVDA menu > Preferences > Settings**.
-6. Select **NVDA Document Settings**.
+6. Select **Document formatting**.
 
 ## Manual test checklist
 

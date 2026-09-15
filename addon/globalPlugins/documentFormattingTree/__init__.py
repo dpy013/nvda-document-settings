@@ -5,6 +5,7 @@ import globalPluginHandler
 import ui
 from gui import guiHelper, nvdaControls
 from gui.settingsDialogs import NVDASettingsDialog, SettingsPanel
+import gui.settingsDialogs as settingsDialogs
 from logHandler import log
 
 try:
@@ -35,19 +36,46 @@ class Category:
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	def __init__(self):
 		super().__init__()
-		if DocumentFormattingTreePanel not in NVDASettingsDialog.categoryClasses:
-			NVDASettingsDialog.categoryClasses.append(DocumentFormattingTreePanel)
+		self._replacedCategoryIndex = None
+		self._replacedCategoryClass = None
+		self._replaceNativeDocumentFormattingPanel()
+
+	def _replaceNativeDocumentFormattingPanel(self):
+		classes = NVDASettingsDialog.categoryClasses
+		nativeClass = getattr(settingsDialogs, "DocumentFormattingPanel", None)
+		for index, categoryClass in enumerate(classes):
+			if categoryClass is DocumentFormattingTreePanel:
+				return
+			if categoryClass is nativeClass or categoryClass.__name__ == "DocumentFormattingPanel":
+				self._replacedCategoryIndex = index
+				self._replacedCategoryClass = categoryClass
+				DocumentFormattingTreePanel.title = getattr(categoryClass, "title", DocumentFormattingTreePanel.title)
+				classes[index] = DocumentFormattingTreePanel
+				return
+		classes.append(DocumentFormattingTreePanel)
 
 	def terminate(self):
-		try:
-			NVDASettingsDialog.categoryClasses.remove(DocumentFormattingTreePanel)
-		except ValueError:
-			pass
+		classes = NVDASettingsDialog.categoryClasses
+		if self._replacedCategoryIndex is not None and self._replacedCategoryClass is not None:
+			try:
+				if classes[self._replacedCategoryIndex] is DocumentFormattingTreePanel:
+					classes[self._replacedCategoryIndex] = self._replacedCategoryClass
+				else:
+					classes.remove(DocumentFormattingTreePanel)
+					classes.insert(self._replacedCategoryIndex, self._replacedCategoryClass)
+			except (IndexError, ValueError):
+				if self._replacedCategoryClass not in classes:
+					classes.append(self._replacedCategoryClass)
+		else:
+			try:
+				classes.remove(DocumentFormattingTreePanel)
+			except ValueError:
+				pass
 		super().terminate()
 
 
 class DocumentFormattingTreePanel(SettingsPanel):
-	title = _("NVDA Document Settings")
+	title = _("Document formatting")
 
 	def makeSettings(self, settingsSizer):
 		docFormatting = config.conf["documentFormatting"]
