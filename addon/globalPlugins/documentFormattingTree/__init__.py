@@ -85,6 +85,9 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		self._choiceOptions = []
 		self._choiceControls = []
 		self._spinControls = []
+		self.choiceList = None
+		self.choiceEditorLabel = None
+		self.choiceEditor = None
 		self._currentCategoryIndex = None
 
 		helper = guiHelper.BoxSizerHelper(self, sizer=settingsSizer)
@@ -112,29 +115,29 @@ class DocumentFormattingTreePanel(SettingsPanel):
 
 	def _buildCategories(self):
 		return [
-			Category(_("Font and text"), [
+			Category(_("Font"), [
 				Option(_("Font name"), "reportFontName"), Option(_("Font size"), "reportFontSize"),
 				Option(_("Superscripts and subscripts"), "reportSuperscriptsAndSubscripts"), Option(_("Emphasis"), "reportEmphasis"),
 				Option(_("Highlighted text"), "reportHighlight"), Option(_("Style"), "reportStyle"), Option(_("Color"), "reportColor"),
-			], [Option(_("Font attribute reporting"), "fontAttributeReporting", [_('Off'), _('Speech'), _('Braille'), _('Speech and braille')], [0, 1, 2, 3])]),
+			], [Option(_("Font attributes"), "fontAttributeReporting", [_('Off'), _('Speech'), _('Braille'), _('Speech and braille')], [0, 1, 2, 3])]),
 			Category(_("Document information"), [Option(_("Comments"), "reportComments"), Option(_("Bookmarks"), "reportBookmarks"), Option(_("Editor revisions"), "reportRevisions")], [
 				Option(_("Spelling or grammar errors"), "reportSpellingErrors2", [_('Off'), _('Speech'), _('Sound'), _('Braille'), _('Speech and sound'), _('Speech and braille'), _('Sound and braille'), _('Speech, sound and braille')], [0, 1, 2, 4, 3, 5, 6, 7])
 			]),
 			Category(_("Pages and spacing"), [
-				Option(_("Page numbers"), "reportPage"), Option(_("Line numbers"), "reportLineNumber"), Option(_("Ignore blank lines for line indentation reporting"), "ignoreBlankLinesForRLI"),
+				Option(_("Pages"), "reportPage"), Option(_("Line numbers"), "reportLineNumber"), Option(_("Ignore blank lines for line indentation reporting"), "ignoreBlankLinesForRLI"),
 				Option(_("Paragraph indentation"), "reportParagraphIndentation"), Option(_("Line spacing"), "reportLineSpacing"), Option(_("Alignment"), "reportAlignment"),
 			], [Option(_("Line indentation reporting"), "reportLineIndentation", [_('Off'), _('Speech'), _('Tones'), _('Speech and tones')], [0, 1, 2, 3])], [
-				Option(_("Indentation tone duration, milliseconds"), "indentToneDuration", minimum=10, maximum=2000)
+				Option(_("Indent tone duration (ms)"), "indentToneDuration", minimum=10, maximum=2000)
 			]),
 			Category(_("Table information"), [Option(_("Tables"), "reportTables"), Option(_("Cell coordinates"), "reportTableCellCoords")], [
-				Option(_("Table headers"), "reportTableHeaders", [_('Off'), _('Rows and columns'), _('Rows'), _('Columns')], [0, 1, 2, 3]),
+				Option(_("Headers"), "reportTableHeaders", [_('Off'), _('Rows and columns'), _('Rows'), _('Columns')], [0, 1, 2, 3]),
 				Option(_("Cell borders"), "reportCellBorders", [_('Off'), _('Style'), _('Color and style')], [0, 1, 2]),
 			]),
 			Category(_("Elements"), [
 				Option(_("Headings"), "reportHeadings"), Option(_("Links"), "reportLinks"), Option(_("Link type"), "reportLinkType"), Option(_("Graphics"), "reportGraphics"),
 				Option(_("Lists"), "reportLists"), Option(_("Block quotes"), "reportBlockQuotes"), Option(_("Groupings"), "reportGroupings"), Option(_("Landmarks and regions"), "reportLandmarks"),
 				Option(_("Articles"), "reportArticles"), Option(_("Frames"), "reportFrames"), Option(_("Figures and captions"), "reportFigures"), Option(_("Clickable"), "reportClickable"),
-				Option(_("Report formatting changes after the cursor, may cause lag"), "detectFormatAfterCursor"),
+				Option(_("Report formatting changes after the cursor (can cause a lag)"), "detectFormatAfterCursor"),
 			]),
 		]
 
@@ -156,6 +159,9 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		self._choiceOptions = []
 		self._choiceControls = []
 		self._spinControls = []
+		self.choiceList = None
+		self.choiceEditorLabel = None
+		self.choiceEditor = None
 
 	def _showCategory(self, index):
 		try:
@@ -179,39 +185,42 @@ class DocumentFormattingTreePanel(SettingsPanel):
 			self._clearSettingsPanel()
 			category = self._categories[index]
 
-			for optionType, option in self._getCategoryItems(category):
-				if optionType == "bool":
-					checkbox = wx.CheckBox(self.categorySettingsPanel, label=option.label)
-					checkbox.SetName(option.label)
-					checkbox.SetValue(bool(self._state.get(option.key)))
-					checkbox.option = option
-					checkbox.Bind(wx.EVT_CHECKBOX, self._onBoolCheckChanged)
-					self.categorySettingsSizer.Add(checkbox, flag=wx.EXPAND | wx.BOTTOM, border=6)
-					self._boolControls.append(checkbox)
-				elif optionType == "choice":
-					label = wx.StaticText(self.categorySettingsPanel, label=option.label)
-					choice = wx.Choice(self.categorySettingsPanel, choices=list(option.choices))
-					choice.SetName(option.label)
-					try:
-						selection = option.values.index(self._state.get(option.key))
-					except ValueError:
-						selection = 0
-					choice.SetSelection(selection)
-					choice.option = option
-					choice.Bind(wx.EVT_CHOICE, self._onChoiceChanged)
-					self.categorySettingsSizer.Add(label)
-					self.categorySettingsSizer.Add(choice, flag=wx.EXPAND | wx.BOTTOM, border=10)
-					self._choiceControls.append(choice)
-				elif optionType == "spin":
-					label = wx.StaticText(self.categorySettingsPanel, label=option.label)
-					spin = wx.SpinCtrl(self.categorySettingsPanel, min=option.minimum, max=option.maximum, initial=int(self._state.get(option.key, option.minimum)))
-					spin.SetName(option.label)
-					spin.option = option
-					spin.Bind(wx.EVT_SPINCTRL, self._onSpinChanged)
-					spin.Bind(wx.EVT_TEXT, self._onSpinChanged)
-					self.categorySettingsSizer.Add(label)
-					self.categorySettingsSizer.Add(spin, flag=wx.EXPAND | wx.BOTTOM, border=10)
-					self._spinControls.append(spin)
+			for option in category.boolOptions:
+				checkbox = wx.CheckBox(self.categorySettingsPanel, label=option.label)
+				checkbox.SetName(option.label)
+				checkbox.SetValue(bool(self._state.get(option.key)))
+				checkbox.option = option
+				checkbox.Bind(wx.EVT_CHECKBOX, self._onBoolCheckChanged)
+				self.categorySettingsSizer.Add(checkbox, flag=wx.EXPAND | wx.BOTTOM, border=6)
+				self._boolControls.append(checkbox)
+
+			if category.choiceOptions:
+				self._choiceOptions = category.choiceOptions
+				self.choiceList = wx.ListBox(self.categorySettingsPanel, choices=[option.label for option in category.choiceOptions])
+				self.choiceList.SetName(_("Mode options"))
+				self.choiceList.SetSelection(0)
+				self.choiceList.Bind(wx.EVT_LISTBOX, self._onChoiceListChanged)
+				self.choiceList.Bind(wx.EVT_SET_FOCUS, self._onChoiceListFocus)
+				self.categorySettingsSizer.Add(self.choiceList, flag=wx.EXPAND | wx.BOTTOM, border=10)
+
+				self.choiceEditorLabel = wx.StaticText(self.categorySettingsPanel)
+				self.choiceEditor = wx.Choice(self.categorySettingsPanel)
+				self.choiceEditor.Bind(wx.EVT_CHOICE, self._onChoiceChanged)
+				self.categorySettingsSizer.Add(self.choiceEditorLabel)
+				self.categorySettingsSizer.Add(self.choiceEditor, flag=wx.EXPAND | wx.BOTTOM, border=10)
+				self._choiceControls.append(self.choiceEditor)
+				self._showChoiceEditor(0)
+
+			for option in category.spinOptions:
+				label = wx.StaticText(self.categorySettingsPanel, label=option.label)
+				spin = wx.SpinCtrl(self.categorySettingsPanel, min=option.minimum, max=option.maximum, initial=int(self._state.get(option.key, option.minimum)))
+				spin.SetName(option.label)
+				spin.option = option
+				spin.Bind(wx.EVT_SPINCTRL, self._onSpinChanged)
+				spin.Bind(wx.EVT_TEXT, self._onSpinChanged)
+				self.categorySettingsSizer.Add(label)
+				self.categorySettingsSizer.Add(spin, flag=wx.EXPAND | wx.BOTTOM, border=10)
+				self._spinControls.append(spin)
 
 			self._updateDependentControls()
 			self.categorySettingsPanel.Layout()
@@ -219,49 +228,36 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		finally:
 			self.categorySettingsPanel.Thaw()
 
-	def _getCategoryItems(self, category):
-		boolByKey = {option.key: option for option in category.boolOptions}
-		choiceByKey = {option.key: option for option in category.choiceOptions}
-		spinByKey = {option.key: option for option in category.spinOptions}
-		orders = {
-			"Font and text": [
-				("bool", "reportFontName"), ("bool", "reportFontSize"), ("choice", "fontAttributeReporting"),
-				("bool", "reportSuperscriptsAndSubscripts"), ("bool", "reportEmphasis"), ("bool", "reportHighlight"),
-				("bool", "reportStyle"), ("bool", "reportColor"),
-			],
-			"Document information": [
-				("bool", "reportComments"), ("bool", "reportBookmarks"), ("bool", "reportRevisions"),
-				("choice", "reportSpellingErrors2"),
-			],
-			"Pages and spacing": [
-				("bool", "reportPage"), ("bool", "reportLineNumber"), ("choice", "reportLineIndentation"),
-				("bool", "ignoreBlankLinesForRLI"), ("spin", "indentToneDuration"), ("bool", "reportParagraphIndentation"),
-				("bool", "reportLineSpacing"), ("bool", "reportAlignment"),
-			],
-			"Table information": [
-				("bool", "reportTables"), ("choice", "reportTableHeaders"), ("bool", "reportTableCellCoords"),
-				("choice", "reportCellBorders"),
-			],
-			"Elements": [
-				("bool", "reportHeadings"), ("bool", "reportLinks"), ("bool", "reportLinkType"), ("bool", "reportGraphics"),
-				("bool", "reportLists"), ("bool", "reportBlockQuotes"), ("bool", "reportGroupings"), ("bool", "reportLandmarks"),
-				("bool", "reportArticles"), ("bool", "reportFrames"), ("bool", "reportFigures"), ("bool", "reportClickable"),
-				("bool", "detectFormatAfterCursor"),
-			],
-		}
-		items = []
-		for optionType, key in orders.get(category.label, []):
-			option = {"bool": boolByKey, "choice": choiceByKey, "spin": spinByKey}[optionType].get(key)
-			if option is not None:
-				items.append((optionType, option))
-		return items
-
 	def _onBoolCheckChanged(self, event):
 		checkbox = event.GetEventObject()
 		option = checkbox.option
 		self._state[option.key] = checkbox.IsChecked()
 		self._updateDependentControls()
 		event.Skip()
+
+	def _onChoiceListFocus(self, event):
+		selection = self.choiceList.GetSelection()
+		if selection != wx.NOT_FOUND:
+			self._showChoiceEditor(selection)
+		event.Skip()
+
+	def _onChoiceListChanged(self, event):
+		self._showChoiceEditor(event.GetSelection())
+		event.Skip()
+
+	def _showChoiceEditor(self, index):
+		option = self._choiceOptions[index]
+		self.choiceEditorLabel.SetLabel(option.label)
+		self.choiceEditor.SetName(option.label)
+		self.choiceEditor.Clear()
+		for choice in option.choices:
+			self.choiceEditor.Append(choice)
+		try:
+			selection = option.values.index(self._state.get(option.key))
+		except ValueError:
+			selection = 0
+		self.choiceEditor.SetSelection(selection)
+		self.choiceEditor.option = option
 
 	def _onChoiceChanged(self, event):
 		choice = event.GetEventObject()
