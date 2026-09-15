@@ -2,7 +2,8 @@ import wx
 
 import config
 import globalPluginHandler
-from gui import guiHelper
+import ui
+from gui import guiHelper, nvdaControls
 from gui.settingsDialogs import NVDASettingsDialog, SettingsPanel
 import gui.settingsDialogs as settingsDialogs
 from logHandler import log
@@ -82,6 +83,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		self._categories = self._buildCategories()
 		self._boolOptions = []
 		self._boolControls = []
+		self.boolList = None
 		self._choiceOptions = []
 		self._choiceControls = []
 		self._spinControls = []
@@ -156,6 +158,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 		self.categorySettingsSizer.Clear()
 		self._boolOptions = []
 		self._boolControls = []
+		self.boolList = None
 		self._choiceOptions = []
 		self._choiceControls = []
 		self._spinControls = []
@@ -185,14 +188,20 @@ class DocumentFormattingTreePanel(SettingsPanel):
 			self._clearSettingsPanel()
 			category = self._categories[index]
 
-			for option in category.boolOptions:
-				checkbox = wx.CheckBox(self.categorySettingsPanel, label=option.label)
-				checkbox.SetName(option.label)
-				checkbox.SetValue(bool(self._state.get(option.key)))
-				checkbox.option = option
-				checkbox.Bind(wx.EVT_CHECKBOX, self._onBoolCheckChanged)
-				self.categorySettingsSizer.Add(checkbox, flag=wx.EXPAND | wx.BOTTOM, border=6)
-				self._boolControls.append(checkbox)
+			if category.boolOptions:
+				self._boolOptions = category.boolOptions
+				self.boolList = nvdaControls.CustomCheckListBox(
+					self.categorySettingsPanel,
+					choices=self._getBoolListLabels(),
+				)
+				self.boolList.SetName(_("Options"))
+				self.boolList.SetCheckedItems([
+					i for i, option in enumerate(category.boolOptions)
+					if bool(self._state.get(option.key))
+				])
+				self.boolList.SetSelection(0)
+				self.boolList.Bind(wx.EVT_CHECKLISTBOX, self._onBoolListChanged)
+				self.categorySettingsSizer.Add(self.boolList, flag=wx.EXPAND | wx.BOTTOM, border=10)
 
 			if category.choiceOptions:
 				self._choiceOptions = category.choiceOptions
@@ -227,6 +236,50 @@ class DocumentFormattingTreePanel(SettingsPanel):
 			self.Layout()
 		finally:
 			self.categorySettingsPanel.Thaw()
+
+	def _getBoolListLabels(self):
+		labels = []
+		for option in self._boolOptions:
+			label = option.label
+			if not self._isBoolOptionEnabled(option):
+				label = _("{label} (unavailable)").format(label=label)
+			labels.append(label)
+		return labels
+
+	def _isBoolOptionEnabled(self, option):
+		if option.key == "ignoreBlankLinesForRLI":
+			return self._state.get("reportLineIndentation", 0) != 0
+		if option.key == "reportLinkType":
+			return bool(self._state.get("reportLinks"))
+		return True
+
+	def _refreshBoolList(self):
+		if not self.boolList:
+			return
+		selection = self.boolList.GetSelection()
+		for index, label in enumerate(self._getBoolListLabels()):
+			self.boolList.SetString(index, label)
+		checked = [
+			index for index, option in enumerate(self._boolOptions)
+			if bool(self._state.get(option.key))
+		]
+		self.boolList.SetCheckedItems(checked)
+		if selection != wx.NOT_FOUND and selection < len(self._boolOptions):
+			self.boolList.SetSelection(selection)
+
+	def _onBoolListChanged(self, event):
+		index = event.GetSelection()
+		option = self._boolOptions[index]
+		if not self._isBoolOptionEnabled(option):
+			self.boolList.Check(index, bool(self._state.get(option.key)))
+			wx.CallAfter(ui.message, _("{label} unavailable").format(label=option.label))
+			event.Skip()
+			return
+		checked = self.boolList.IsChecked(index)
+		self._state[option.key] = checked
+		wx.CallAfter(ui.message, _("{label} checked" if checked else "{label} not checked").format(label=option.label))
+		self._updateDependentControls()
+		event.Skip()
 
 	def _onBoolCheckChanged(self, event):
 		checkbox = event.GetEventObject()
@@ -273,11 +326,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 
 	def _updateDependentControls(self):
 		reportLineIndentation = self._state.get("reportLineIndentation", 0)
-		for checkbox in self._boolControls:
-			if checkbox.option.key == "ignoreBlankLinesForRLI":
-				checkbox.Enable(reportLineIndentation != 0)
-			elif checkbox.option.key == "reportLinkType":
-				checkbox.Enable(bool(self._state.get("reportLinks")))
+		self._refreshBoolList()
 		for spin in self._spinControls:
 			if spin.option.key == "indentToneDuration":
 				spin.Enable(reportLineIndentation in (2, 3))
