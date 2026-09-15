@@ -8,7 +8,7 @@ The add-on replaces NVDA's built-in **Document formatting** category while it is
 
 ## Goals
 
-- Keep the same setting names, groups, and configuration keys as NVDA where possible.
+- Keep the same setting names, groups, order, and configuration keys as NVDA where possible.
 - Make the settings easier to browse with a category tree.
 - Keep simple on/off options in a compact options list.
 - Show detailed editors, such as combo boxes, spin controls, and multi-select lists, only when the user activates the related option.
@@ -61,15 +61,58 @@ Important files:
   - Reads initial values from `config.conf["documentFormatting"]`.
   - Writes changed values back on Save.
 
-## Build and checks
+## Build system
 
-The project uses uv for the local development environment and SCons for packaging.
+The build follows NVDA's uv/SCons wrapper pattern:
+
+- Run SCons through `scons.bat`, not directly through the system Python.
+- `scons.bat` calls `ensureuv.ps1`.
+- `ensureuv.ps1` checks the installed uv version and then runs `uv run --directory ... SCons`.
+- `SConstruct` refuses to run outside the uv-managed virtual environment.
+
+This keeps builds reproducible and avoids accidentally using globally installed Python packages.
+
+## Common commands
+
+Configure the uv virtual environment:
 
 ```powershell
 .\scons.bat configure
+```
+
+Build the add-on package:
+
+```powershell
+.\scons.bat building
+```
+
+Generate the translation template:
+
+```powershell
+.\scons.bat pot
+```
+
+Generate the user guide:
+
+```powershell
+.\scons.bat document
+```
+
+Clean build outputs and local build caches:
+
+```powershell
+.\scons.bat clear
+```
+
+`clear` removes generated build outputs and caches, but keeps `.venv` so the configured build environment can be reused.
+
+## Checks
+
+Run formatting and lint checks from the uv environment:
+
+```powershell
 uv run ruff check .
 uv run ruff format --check .
-.\scons.bat building
 ```
 
 The generated add-on package is:
@@ -78,15 +121,17 @@ The generated add-on package is:
 documentFormattingTree-0.1.0.nvda-addon
 ```
 
-## Localization
+The generated localization template is:
 
-Generate the translation template with:
-
-```powershell
-.\scons.bat pot
+```text
+locale/documentFormattingTree.pot
 ```
 
-The template is generated from translatable `_()` strings in the add-on source.
+The generated user guide is:
+
+```text
+build/userGuide.md
+```
 
 ## Testing notes
 
@@ -109,4 +154,3 @@ The current target range is:
 - Last tested NVDA version: 2027.1
 
 When NVDA changes the native `DocumentFormattingPanel`, update `options.py` and the grouping/order logic in `panel.py` to match NVDA first, then adjust the prototype UI only where needed.
-
