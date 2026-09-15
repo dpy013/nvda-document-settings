@@ -182,6 +182,7 @@ class DocumentFormattingTreePanel(SettingsPanel):
 				self.boolList = nvdaControls.CustomCheckListBox(self.categorySettingsPanel, choices=[option.label for option in category.boolOptions])
 				self.boolList.SetName(_("Options"))
 				self.boolList.SetCheckedItems([i for i, option in enumerate(category.boolOptions) if bool(self._state.get(option.key))])
+				self.boolList.SetSelection(0)
 				self.boolList.Bind(wx.EVT_CHECKLISTBOX, self._onBoolListChanged)
 				self.categorySettingsSizer.Add(self.boolList, flag=wx.EXPAND | wx.BOTTOM, border=10)
 
